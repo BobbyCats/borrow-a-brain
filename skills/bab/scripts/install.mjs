@@ -100,6 +100,7 @@ export async function install(home, {source, skillsDir, rulesFile, apply = false
 
 export async function uninstall(home, skillsDir) {
   skillsDir = path.resolve(skillsDir);
+  if (process.platform === 'win32' && process.versions.bun && isWithin(skillsDir, process.execPath)) throw new Error('Windows 无法删除正在运行的程序。请使用原下载包中的 bab.exe 执行卸载，目标目录保持不变。');
   const undo = []; const backups = []; let committed = false;
   try {
     const result = await mutateState(home, async state => {

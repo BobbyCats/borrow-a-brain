@@ -47,6 +47,8 @@ try {
   assert.equal(run('update-apply', await argsFile(update)).updated, '0.1.1');
   assert.equal(run('help').version, '0.1.1');
   assert.equal(run('memory-query', '结论')[0].id, rule.id);
+  // Use the downloaded launcher: Windows cannot remove the executable that is currently running.
+  installed = false;
   assert.equal(run('uninstall', skillsDir).uninstalled.length, 5);
   assert.ok(!(await fs.readFile(rulesFile, 'utf8')).includes('borrow-a-brain:start'));
   assert.equal(JSON.parse(await fs.readFile(path.join(home, 'state.json'), 'utf8')).rules[0].id, rule.id);
