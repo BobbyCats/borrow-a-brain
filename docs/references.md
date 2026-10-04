@@ -15,9 +15,9 @@
 
 - mattpocock/skills：`24fe0ef7737efae15c87225755e9f6f5965e4888`
 - garrytan/gstack：`2db0b3adc84b95be08d08bda4f9799ca7fa8665e`
-- QingYunA/answer-me-with-html：`02c756ce1ccd1f78c3b17501aa4efa14410ffd9a`
+- QingYunA/answer-me-with-html：`759effdb5222c278a5076d5dada035102396a084`
 - alchaincyf/nuwa-skill：`fe0374687037c4cc51a65c1e0c145afe2981dc69`
 - notdog1998/yourself-skill：`9deb1a87b1231fec85cadf2ef690fa49fef519ca`
 - deepseek-ai/deepseek-harness：`5badb15009ae1756c3afe0ae0cef1faafc290ccc`
 
-Nuwa、yourself 与 DSH 的最新提交在人物机制及 Harness 讨论时重新核对。其他来源沿用本次设计评审的当日上游快照。
+所有来源在本轮重新核对。answer-me-with-html 相比早些时候的快照新增了反馈表单与 PR 模板；已检查该增量，并在本套件反馈正文中补充经过预览的宿主、系统和安装方式字段。

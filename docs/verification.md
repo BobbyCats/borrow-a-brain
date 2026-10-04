@@ -20,4 +20,10 @@
 
 方法分工测试验证程序约束，不证明模型一定能选择最佳专家。人物“老王”“小李”均为构造示例；未使用真实同事资料。
 
-自然语言路由、人物方法实际有效性、新手试用、Windows/Linux 真机宿主体验、官网和 DSH 运行适配尚未验收。GitHub Actions 结果以仓库中的实际运行记录为准。
+## 跨平台 CI
+
+[adbd851 的六项 CI](https://github.com/BobbyCats/borrow-a-brain/actions/runs/37223804560) 全部通过：macOS、Windows、Linux 的 Node 检查，以及三个平台的独立程序构建和安装、升级、卸载验证。
+
+Windows 的两个符号链接测试因非管理员创建链接的环境条件明确跳过；它们在 macOS/Linux 执行。Windows 换行导致的格式误判已修正。Windows 独立程序卸载使用原下载包中的程序，避免尝试删除自身。
+
+自然语言路由、人物方法实际有效性、新手试用、Windows/Linux 真机宿主体验、官网和 DSH 运行适配尚未验收。最新提交的 CI 状态以仓库运行记录为准。

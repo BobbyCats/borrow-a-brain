@@ -21,6 +21,7 @@ export async function draftFeedback(home, input) {
   for (const key of fields) report[key] = redact(boundedString(input[key], key, 4000));
   report.excerpt = redact(String(input.excerpt || '').slice(0, 2000));
   report.skill = boundedString(input.skill, 'Skill', 100);
+  report.environment = Object.fromEntries(['agent', 'os', 'runtime', 'installMethod'].map(key => [key, redact(String(input.environment?.[key] || '未提供').slice(0, 200))]));
   const endpoint = input.endpoint ? endpointURL(input.endpoint) : null;
   const approvalHash = digest({endpoint, report});
   const draft = {report, endpoint, approvalHash, status: 'draft'};

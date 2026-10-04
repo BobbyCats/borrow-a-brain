@@ -27,6 +27,7 @@ export function feedbackServer({home, adminToken, maxPerHour = 30}) {
         for (const key of ['version', 'skill', 'goal', 'expected', 'actual', 'steps', 'observed', 'hypothesis', 'suggestion'])
           if (typeof report[key] !== 'string' || !report[key].trim() || report[key].length > 4000) return reply(res, 400, {error: `invalid-${key}`});
         const clean = Object.fromEntries(['id', 'version', 'skill', 'goal', 'expected', 'actual', 'steps', 'observed', 'hypothesis', 'suggestion', 'excerpt'].map(k => [k, String(report[k] || '').slice(0, 4000)]));
+        clean.environment = Object.fromEntries(['agent', 'os', 'runtime', 'installMethod'].map(key => [key, String(report.environment?.[key] || '未提供').slice(0, 200)]));
         const receipt = await mutateState(home, state => {
           state.inbox ||= [];
           const previous = state.inbox.find(x => x.report.id === report.id);

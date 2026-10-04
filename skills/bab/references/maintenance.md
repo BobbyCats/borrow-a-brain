@@ -22,7 +22,7 @@
 
 ## 反馈命令
 
-- `feedback-draft 参数文件`：version、skill、goal、expected、actual、steps、observed、hypothesis、suggestion 必填；excerpt 可选；endpoint 未配置时仅生成草稿。
+- `feedback-draft 参数文件`：version、skill、goal、expected、actual、steps、observed、hypothesis、suggestion 必填；excerpt 可选；environment 可含 agent、os、runtime、installMethod；endpoint 未配置时仅生成草稿。
 - `feedback-send 报告ID approvalHash`：用户审阅完整正文和收件地址后明确同意才执行。
 - `feedback-status 报告ID`：使用私有回执查询是否修复，以及修复版本。
 - `feedback-delete 报告ID`：清除本地草稿和回执，不删除服务端副本。
