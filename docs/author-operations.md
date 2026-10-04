@@ -53,3 +53,14 @@ Web 会话使用 HttpOnly、Secure、SameSite=Strict Cookie，8 小时有效；�
 完整发布：更新版本 → 执行测试和 validate → 构建或复用验收过的原生运行器 → 组装并签名 → 隔离安装与升级验收 → 上传固定版本目录 → 更新发行清单与官网 → 实际下载回读。
 
 原生运行器动态加载脚本，源码升级保留已登记的运行器。更新 Bun 内核时另发完整平台包并验证，不能把二进制变更伪装成普通方法更新。
+
+
+## 0.1.2 之后的离线发行组装
+
+使用本仓库 `scripts/package-release.mjs`，不再把版本、域名和开发机路径硬编码进发行脚本。它只生成本地文件，不部署、不创建密钥，也不公开仓库。
+
+作者在仓库外准备 JSON 配置：authorFile、keyFile、notesFile、outDir、downloadBase、previousReleasesFile；runtimes 提供 mac-arm64 / windows-x64 / linux-x64 的本次 CI 构建目录。作者机需要 Python 3 的标准库生成 ZIP；使用者不需要 Python。
+
+组装器核对作者配置、密钥位置、对应构建版本和签名。只打包五个 Skill、公开帮助、许可与启动器源代码。服务端、测试、人物资料、状态和私钥不进入安装包。同版本目录不能被覆盖，历史版本号继续保留在清单中。
+
+输出包含四个平台包、SHA256SUMS、独立版本 release.json、update.json，以及待发布的 latest.json / releases.json / author.json。发布时先上传新版本目录并验哈希，再切换清单和说明；保留旧包。地址变更通过同一可信签名发布，在旧入口下线前让用户取得新配置。单一域名彻底失效前未升级的离线用户仍可能需要手工导入新配置；不要把配置化宣传为永不失联。
