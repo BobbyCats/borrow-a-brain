@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+.env
+.env.*
+*.private.pem
+*.key
+.bab-state/
+test-results/
+*.log

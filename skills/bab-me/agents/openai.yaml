@@ -1,0 +1,6 @@
+interface:
+  display_name: "懂我一点 · Know Me"
+  short_description: "从获准的记录里发现你的做事习惯，留下有证据、能修改和删除的记忆。"
+  default_prompt: "请用 $bab-me 帮我找出最近反复在意的事情，先说明会读取哪些材料。"
+policy:
+  allow_implicit_invocation: true

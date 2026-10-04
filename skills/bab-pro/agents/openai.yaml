@@ -1,0 +1,6 @@
+interface:
+  display_name: "借个高手 · Borrow a Mind"
+  short_description: "从别人的材料里学会判断和行动，提炼有来源、有条件、能试用的方法。"
+  default_prompt: "请用 $bab-pro 帮我从这份材料里学会一个能用于当前问题的方法。"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,23 @@
+# 参考来源与采用范围
+
+这些项目用于研究机制。本仓库的代码和中文流程为本次原创实现，没有将上游完整入口或脚本复制进仓库。引用上游功能说明不代表上游为本项目背书。
+
+| 来源 | 本次参考的机制 | 采用方式与差异 |
+| --- | --- | --- |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | 逐问追问、推荐答案、问题依赖 | 中文选项给推荐和理由；已有信息够用就停止 |
+| [garrytan/gstack Office Hours](https://github.com/garrytan/gstack/tree/main/office-hours) | 分阶段诊断、结构化交接、上下文与维护 | 按需流程与明确交付；作者资源有显性说明与关闭开关 |
+| [answer-me-with-html](https://github.com/QingYunA/answer-me-with-html) | 配置、安装、更新、可读结果 | 地址与运行数据分离；旧网页样稿不当正式页面 |
+| [女娲](https://github.com/alchaincyf/nuwa-skill) | 来源调研、判断模型、边界、新问题验证 | 提炼方法并试用；不照搬名人数量或“高保真”评分结论 |
+| [yourself-skill](https://github.com/notdog1998/yourself-skill) | 持续补充、对话纠正、版本存档与回滚 | 人物数据与套件代码分开；精确版本启用，候选与确认分开 |
+| [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) | 插件化运行时、按需 Skill、子代理、事件和存储 | 可选宿主设计；未作为当前依赖 |
+
+2026-10-05 本轮参考快照：
+
+- mattpocock/skills：`24fe0ef7737efae15c87225755e9f6f5965e4888`
+- garrytan/gstack：`2db0b3adc84b95be08d08bda4f9799ca7fa8665e`
+- QingYunA/answer-me-with-html：`02c756ce1ccd1f78c3b17501aa4efa14410ffd9a`
+- alchaincyf/nuwa-skill：`fe0374687037c4cc51a65c1e0c145afe2981dc69`
+- notdog1998/yourself-skill：`9deb1a87b1231fec85cadf2ef690fa49fef519ca`
+- deepseek-ai/deepseek-harness：`5badb15009ae1756c3afe0ae0cef1faafc290ccc`
+
+Nuwa、yourself 与 DSH 的最新提交在人物机制及 Harness 讨论时重新核对。其他来源沿用本次设计评审的当日上游快照。

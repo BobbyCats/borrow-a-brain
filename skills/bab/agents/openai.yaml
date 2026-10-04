@@ -1,0 +1,6 @@
+interface:
+  display_name: "借个脑子 · Borrow a Brain"
+  short_description: "把事情想清楚，学会别人的方法，让 AI 更懂你的做事习惯。"
+  default_prompt: "请用 $bab 帮我处理眼前的问题。先理解我要完成什么，再选择需要的流程。"
+policy:
+  allow_implicit_invocation: true

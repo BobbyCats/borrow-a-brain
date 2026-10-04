@@ -1,0 +1,6 @@
+interface:
+  display_name: "带我上手 · Show Me How"
+  short_description: "从一件小事开始体验，教你安装、使用、更新、反馈和管理个人记忆。"
+  default_prompt: "请用 $bab-help 带我用一件小事体验一次，少讲术语。"
+policy:
+  allow_implicit_invocation: true

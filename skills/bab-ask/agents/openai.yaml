@@ -1,0 +1,6 @@
+interface:
+  display_name: "问到点上 · Ask Me Why"
+  short_description: "一次问到一个关键点，给出推荐和理由，把想不清楚的事情推进到行动。"
+  default_prompt: "请用 $bab-ask 帮我理清这个想法，先问一个最影响决定的问题。"
+policy:
+  allow_implicit_invocation: true
