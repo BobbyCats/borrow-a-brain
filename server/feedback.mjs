@@ -5,15 +5,16 @@ import {readState, mutateState} from '../skills/bab/scripts/store.mjs';
 import {fileURLToPath} from 'node:url';
 
 const equal = (a, b) => typeof a === 'string' && typeof b === 'string' && Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
-export function feedbackServer({home, adminToken, maxPerHour = 30}) {
+export function feedbackServer({home, adminToken, maxPerHour = 30, middleware, trustProxy = false}) {
   if (!adminToken || adminToken.length < 32) throw new Error('后台令牌至少 32 字符，从环境变量提供。');
   const rates = new Map();
   const reply = (res, code, data) => {res.writeHead(code, {'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store'}); res.end(JSON.stringify(data));};
   return http.createServer(async (req, res) => {
     try {
+      if (middleware && await middleware(req, res)) return;
       const url = new URL(req.url, 'http://localhost');
       if (req.method === 'POST' && url.pathname === '/v1/feedback') {
-        const address = req.socket.remoteAddress;
+        const address = trustProxy ? (req.headers['x-real-ip'] || req.socket.remoteAddress) : req.socket.remoteAddress;
         const now = Date.now();
         for (const [key, row] of rates) if (row.reset < now) rates.delete(key);
         if (!rates.has(address) && rates.size >= 10000) return reply(res, 503, {error: 'busy'});
@@ -48,7 +49,7 @@ export function feedbackServer({home, adminToken, maxPerHour = 30}) {
       if (req.method === 'GET' && match) {
         const state = await readState(home); const row = state.inbox?.find(x => x.report.id === match[1]);
         if (!row || !equal(req.headers.authorization, `Bearer ${row.token}`)) return reply(res, 404, {error: 'not-found'});
-        return reply(res, 200, {id: row.report.id, status: row.status, fixedIn: row.fixedIn});
+        return reply(res, 200, {id: row.report.id, status: row.status, fixedIn: row.fixedIn, ...(row.reply ? {message: row.reply} : {})});
       }
       return reply(res, 404, {error: 'not-found'});
     } catch (e) {return reply(res, e.message === 'id-conflict' ? 409 : 500, {error: e.message === 'id-conflict' ? e.message : 'internal-error'});}

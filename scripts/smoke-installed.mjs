@@ -8,8 +8,12 @@ import {generateKeyPairSync, sign, createHash} from 'node:crypto';
 import {fileMap} from '../skills/bab/scripts/install.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const currentVersion = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8')).version;
+const nextVersion = currentVersion.split('.').map((x,i)=>i===2?Number(x)+1:x).join('.');
 const native = process.argv.includes('--native');
-const base = native ? path.join(root, 'dist', `${process.platform}-${process.arch}`) : root;
+const packageIndex = process.argv.indexOf('--package');
+if (packageIndex >= 0 && !process.argv[packageIndex + 1]) throw Error('--package 需要目录');
+const base = packageIndex >= 0 ? path.resolve(process.argv[packageIndex + 1]) : native ? path.join(root, 'dist', `${process.platform}-${process.arch}`) : root;
 const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'bab-installed-'));
 const home = path.join(temp, 'data'), skillsDir = path.join(temp, 'host', 'skills'), rulesFile = path.join(temp, 'host', 'AGENTS.md');
 const env = {...process.env, BAB_HOME: home};
@@ -25,11 +29,11 @@ function run(...args) {
   return JSON.parse(result.stdout);
 }
 try {
-  const config = {source: path.join(base, 'skills'), skillsDir, rulesFile, apply: false, version: '0.1.0'};
+  const config = {source: path.join(base, 'skills'), skillsDir, rulesFile, apply: false, version: currentVersion};
   assert.equal(run('install', await argsFile(config)).apply, false);
   await assert.rejects(fs.stat(skillsDir));
   config.apply = true; assert.equal(run('install', await argsFile(config)).skills.length, 5); installed = true;
-  assert.equal(run('help').version, '0.1.0');
+  assert.equal(run('help').version, currentVersion);
   const rule = run('memory-add', await argsFile({kind: 'preference', status: 'confirmed', userConfirmed: true, statement: '合成测试喜欢先给结论', conditions: '测试报告', sources: [{role: 'user', ref: 'synthetic://smoke', excerpt: '测试要求'}]}));
   assert.equal(run('memory-query', '结论')[0].id, rule.id);
   const before = await fs.readFile(rulesFile, 'utf8');
@@ -38,14 +42,14 @@ try {
   const files = [];
   for (const file of Object.keys(await fileMap(path.join(root, 'skills')))) {
     let content = await fs.readFile(path.join(root, 'skills', file));
-    if (file === 'bab/assets/version.json') content = Buffer.from('{"version":"0.1.1","channel":"synthetic-test"}');
+    if (file === 'bab/assets/version.json') content = Buffer.from(JSON.stringify({version:nextVersion,channel:'synthetic-test'}));
     files.push({path: `skills/${file}`, content: content.toString('base64'), sha256: createHash('sha256').update(content).digest('hex')});
   }
-  const bytes = Buffer.from(JSON.stringify({schema: 1, version: '0.1.1', notes: '合成升级包：只用于隔离安装验证。', files}));
+  const bytes = Buffer.from(JSON.stringify({schema: 1, version: nextVersion, notes: '合成升级包：只用于隔离安装验证。', files}));
   const envelope = {payload: bytes.toString('base64'), signature: sign(null, bytes, keys.privateKey).toString('base64')};
-  const update = {envelope, publicKey: keys.publicKey.export({format: 'pem', type: 'spki'}), currentVersion: '0.1.0', approvedVersion: '0.1.1', skillsDir, rulesFile};
-  assert.equal(run('update-apply', await argsFile(update)).updated, '0.1.1');
-  assert.equal(run('help').version, '0.1.1');
+  const update = {envelope, publicKey: keys.publicKey.export({format: 'pem', type: 'spki'}), currentVersion, approvedVersion: nextVersion, skillsDir, rulesFile};
+  assert.equal(run('update-apply', await argsFile(update)).updated, nextVersion);
+  assert.equal(run('help').version, nextVersion);
   assert.equal(run('memory-query', '结论')[0].id, rule.id);
   // Use the downloaded launcher: Windows cannot remove the executable that is currently running.
   installed = false;
