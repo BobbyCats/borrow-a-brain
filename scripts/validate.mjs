@@ -20,7 +20,7 @@ async function walk(dir) {
   return rows;
 }
 for (const id of expected) {
-  const skill = path.join(root, 'skills', id, 'SKILL.md'); const text = await fs.readFile(skill, 'utf8');
+  const skill = path.join(root, 'skills', id, 'SKILL.md'); const text = (await fs.readFile(skill, 'utf8')).replace(/\r\n/gu, '\n');
   if (!text.startsWith(`---\nname: ${id}\ndescription: "`) || !text.includes('\n---\n')) failures.push(`frontmatter: ${id}`);
   if (text.split('\n').length > 500) failures.push(`入口过长：${id}`);
   const yaml = await fs.readFile(path.join(root, 'skills', id, 'agents', 'openai.yaml'), 'utf8');
