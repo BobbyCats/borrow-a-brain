@@ -4,7 +4,7 @@
 
 | 来源 | 本次参考的机制 | 采用方式与差异 |
 | --- | --- | --- |
-| [mattpocock/skills](https://github.com/mattpocock/skills) | 逐问追问、推荐答案、问题依赖 | 中文选项给推荐和理由；已有信息够用就停止 |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | 当前 grilling 的问题依赖树、按前提推进、推荐答案、自查事实 | 上游会一轮询问全部可问节点；本套件为新手改成通常一题，保留依赖顺序和推荐理由 |
 | [garrytan/gstack Office Hours](https://github.com/garrytan/gstack/tree/main/office-hours) | 分阶段诊断、结构化交接、上下文与维护 | 按需流程与明确交付；作者资源有显性说明与关闭开关 |
 | [answer-me-with-html](https://github.com/QingYunA/answer-me-with-html) | 配置、安装、更新、可读结果 | 地址与运行数据分离；旧网页样稿不当正式页面 |
 | [女娲](https://github.com/alchaincyf/nuwa-skill) | 来源调研、判断模型、边界、新问题验证 | 提炼方法并试用；不照搬名人数量或“高保真”评分结论 |
@@ -21,3 +21,5 @@
 - deepseek-ai/deepseek-harness：`5badb15009ae1756c3afe0ae0cef1faafc290ccc`
 
 所有来源在本轮重新核对。answer-me-with-html 相比早些时候的快照新增了反馈表单与 PR 模板；已检查该增量，并在本套件反馈正文中补充经过预览的宿主、系统和安装方式字段。
+
+0.1.2 发行复核再次获取六个仓库的当前提交，均仍为上方快照。逐项落地与验证见 [机制采用表](reference-adoption.md)。没有把“读过上游”当成“全部能力已经实现”。

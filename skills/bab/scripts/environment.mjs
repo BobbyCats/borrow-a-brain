@@ -5,7 +5,7 @@ import {dataHome} from './store.mjs';
 
 export async function doctor(home = dataHome()) {
   const candidates = {
-    codex: {skills: path.join(os.homedir(), '.codex', 'skills'), history: path.join(os.homedir(), '.codex', 'sessions')},
+    codex: {skills: path.join(os.homedir(), '.agents', 'skills'), legacySkills: path.join(os.homedir(), '.codex', 'skills'), history: path.join(os.homedir(), '.codex', 'sessions')},
     claude: {skills: path.join(os.homedir(), '.claude', 'skills'), history: path.join(os.homedir(), '.claude', 'projects')}
   };
   const hosts = {};

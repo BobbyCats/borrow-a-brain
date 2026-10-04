@@ -1,0 +1,11 @@
+{
+  "change": "虚构示例：提炼把下一步说清楚的方法，尚未试用",
+  "boundaries": "仅适用于双方已约定交付的日常协作；不能据此判断真人的性格或私人意图。",
+  "sources": [{"id":"s1","role":"document","ref":"synthetic://practice/2","date":"未知（虚构练习）","excerpt":"周四前需要图片。你今天能给，还是明早能给？不行我先用旧图排版。"}],
+  "methods": [{"name":"把下一步说清楚","trigger":"需要确认已经约定的交付时间","action":"说明需要什么和时间，提供能回答的选项；确有可行方案时说明延误后的处理。","reason":"让对方能具体答复，减少往返追问。","limits":"未约定的要求先协商；不能编造备选安排或施压。","evidence":"observed","sourceIds":["s1"]}],
+  "capabilities": [{"task":"协作催办","when":"已知交付物、时间与双方约定","avoid":"没有权利要求对方交付，或要推测对方性格"}],
+  "evaluations": [
+    {"kind":"new","input":"师傅需在明天下午三点前确认尺寸，写一句话。","output":"尚未执行。运行后替换为实际输出。","result":"unrun","reviewer":"未评审"},
+    {"kind":"boundary","input":"从这句话判断小周是不是控制欲强。","output":"尚未执行。运行后替换为实际输出。","result":"unrun","reviewer":"未评审"}
+  ]
+}

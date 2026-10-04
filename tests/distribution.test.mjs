@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import {generateKeyPairSync, createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {packageRelease} from '../scripts/package-release.mjs';
+import {verifyBundle} from '../skills/bab/scripts/update.mjs';
+
+test('分发源包含完整上手资料与有效签名，保留旧版本清单且不夹带私有目录', async t => {
+  const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'bab-distribution-')); t.after(() => fs.rm(temp, {recursive: true, force: true}));
+  const keys = generateKeyPairSync('ed25519');
+  const publicKey = keys.publicKey.export({format: 'pem', type: 'spki'});
+  const input = {keyFile: path.join(temp, 'private.pem'), authorFile: path.join(temp, 'author.json'), notesFile: path.join(temp, 'notes.txt'), previousReleasesFile: path.join(temp, 'previous.json'), outDir: path.join(temp, 'release'), downloadBase: 'https://example.test/downloads/'};
+  await fs.writeFile(input.keyFile, keys.privateKey.export({format: 'pem', type: 'pkcs8'}));
+  await fs.writeFile(input.authorFile, JSON.stringify({schema: 1, website: 'https://example.test/guide/', feedbackEndpoint: 'https://example.test/feedback', update: {sources: ['https://example.test/latest.json'], publicKey}}));
+  await fs.writeFile(input.notesFile, '合成发行验证，不会公开。');
+  await fs.writeFile(input.previousReleasesFile, JSON.stringify({versions: ['0.1.0']}));
+  const result = await packageRelease(input); assert.equal(result.packages, 1); assert.equal(result.published, false);
+  const manifest = JSON.parse(await fs.readFile(path.join(input.outDir, 'releases.json'), 'utf8'));
+  assert.ok(manifest.versions.includes('0.1.0'));
+  const envelope = JSON.parse(await fs.readFile(path.join(input.outDir, 'latest.json'), 'utf8'));
+  assert.equal(verifyBundle(envelope, publicKey).version, result.version);
+  const zip = path.join(result.destination, 'borrow-a-brain-source.zip');
+  assert.equal(createHash('sha256').update(await fs.readFile(zip)).digest('hex'), manifest.downloads[0].sha256);
+  const inspect = spawnSync(process.platform === 'win32' ? 'python' : 'python3', ['-c', 'import json,sys,zipfile\nwith zipfile.ZipFile(sys.argv[1]) as z:\n print(json.dumps(z.namelist()))\n assert z.testzip() is None', zip], {encoding: 'utf8'});
+  assert.equal(inspect.status, 0, inspect.stderr);
+  const names = JSON.parse(inspect.stdout);
+  assert.equal(names.filter(n => n.endsWith('/SKILL.md')).length, 5);
+  for (const file of ['开始使用.md', 'docs/quickstart.md', 'skills/bab/assets/getting-started.md', 'skills/bab/assets/examples/profile-version.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'third_party/BUN-LICENSE.md', 'runtime.mjs']) assert.ok(names.includes(file), file);
+  assert.ok(!names.some(n => /(^|\/)(server|tests|people|\.git)(\/|$)|state\.json|\.pem$/u.test(n)));
+  await assert.rejects(packageRelease(input), /不能覆盖同版本/u);
+});

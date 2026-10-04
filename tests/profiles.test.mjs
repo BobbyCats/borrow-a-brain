@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {createProfile, saveProfileVersion, activateProfile, resolveProfile, getProfile, deleteProfile, exportProfile, listProfiles} from '../skills/bab/scripts/profiles.mjs';
-import {routingCatalog, saveRoute, loadRoute} from '../skills/bab/scripts/routing.mjs';
+import {routingCatalog, saveRoute, loadRoute, listRoutes, checkpointRoute} from '../skills/bab/scripts/routing.mjs';
 
 async function sandbox(t) {const home = await fs.mkdtemp(path.join(os.tmpdir(), 'bab-people-')); t.after(() => fs.rm(home, {recursive: true, force: true})); return home;}
 const person = (name = '合成老王', scope = 'personal') => ({name, aliases: ['王老师'], kind: 'person', purpose: '把延期原因与补救措施讲清楚', userApproved: true, scope});
@@ -84,4 +84,21 @@ test('删除人物清除所有版本和任务引用', async t => {
   await assert.rejects(fs.stat(path.join(home, 'people', p.id)));
   assert.equal((await resolveProfile(home, '合成老王')).status, 'not-found');
   assert.equal((await loadRoute(home, 'forget')).status, 'not-found');
+});
+
+test('跨会话先找任务再恢复；摘要与任务编号不可跨项目覆盖', async t => {
+  const home = await sandbox(t), p = await active(home);
+  const input = {taskId: 'delay', scope: 'project:A', intent: '解释延期', deliverable: '给客户的话', selected: [{id: p.id, role: 'lead', responsibility: '组织事实', why: '有对应方法'}]};
+  await saveRoute(home, input);
+  await checkpointRoute(home, 'delay', {scope: 'project:A', status: 'active', summary: '合成任务已确认延期一天，草稿待缩短', next: '缩成两句话'});
+  assert.equal((await listRoutes(home)).length, 0);
+  const recent = await listRoutes(home, {scope: 'project:A', query: '延期'});
+  assert.equal(recent.length, 1); assert.equal(recent[0].checkpoint.next, '缩成两句话');
+  assert.equal(recent[0].record, undefined); assert.equal(recent[0].methods[0].version, 'v0001');
+  assert.equal((await loadRoute(home, recent[0].taskId, 'project:A')).profiles[0].version, 'v0001');
+  await assert.rejects(saveRoute(home, {...input, scope: 'project:B'}), /其他范围/u);
+  await assert.rejects(checkpointRoute(home, 'delay', {status: 'done', summary: 'x', next: 'x'}), /范围/u);
+  assert.equal((await listRoutes(home, {scope: 'project:A', query: '不存在'})).length, 0);
+  await deleteProfile(home, p.id);
+  assert.equal((await listRoutes(home, {scope: 'project:A'})).length, 0);
 });

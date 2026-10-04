@@ -114,7 +114,8 @@ async function packageFixture(home) {
 test('安装可预览、幂等，保留原规则；卸载保留记忆', async t => {
   const home = await sandbox(t), config = await packageFixture(home);
   await fs.mkdir(path.dirname(config.rulesFile), {recursive: true}); await fs.writeFile(config.rulesFile, '# My rules\nDo not change me.\n');
-  assert.equal((await install(home, config)).apply, false);
+  const preview = await install(home, config);
+  assert.equal(preview.apply, false); assert.ok(preview.ruleBlock.includes('新会话首次答复前')); assert.equal(preview.preflight, 'passed');
   await assert.rejects(fs.stat(config.skillsDir));
   await addRule(home, rule({}));
   await install(home, {...config, apply: true}); await install(home, {...config, apply: true});
@@ -198,13 +199,22 @@ test('作者资源需相关证据，14 天冷却，同资源不重复，可永�
 
 function bundle(version = '0.2.0', filePath = 'skills/bab/SKILL.md', keys = generateKeyPairSync('ed25519')) {
   const content = Buffer.from('---\nname: bab\ndescription: new\n---\n# New');
-  const payload = Buffer.from(JSON.stringify({schema: 1, version, notes: '减少重复追问。记忆保留。', files: [{path: filePath, content: content.toString('base64'), sha256: createHash('sha256').update(content).digest('hex')}]}));
+  const versionContent = Buffer.from(JSON.stringify({version}));
+  const payload = Buffer.from(JSON.stringify({schema: 1, version, notes: '减少重复追问。记忆保留。', files: [{path: filePath, content: content.toString('base64'), sha256: createHash('sha256').update(content).digest('hex')}, {path: 'skills/bab/assets/version.json', content: versionContent.toString('base64'), sha256: createHash('sha256').update(versionContent).digest('hex')}]}));
   return {envelope: {payload: payload.toString('base64'), signature: sign(null, payload, keys.privateKey).toString('base64')}, publicKey: keys.publicKey.export({type: 'spki', format: 'pem'})};
 }
 test('更新验证签名、路径，拒绝伪造包', () => {
   const good = bundle(); assert.equal(verifyBundle(good.envelope, good.publicKey).version, '0.2.0');
   assert.throws(() => verifyBundle({...good.envelope, signature: Buffer.from('bad').toString('base64')}, good.publicKey));
   const traversal = bundle('0.2.0', 'skills/../../state.json'); assert.throws(() => verifyBundle(traversal.envelope, traversal.publicKey), /越界/u);
+});
+test('有正确签名但程序版本与发行说明不符的包也拒绝', () => {
+  const keys = generateKeyPairSync('ed25519'), original = bundle('0.2.0', 'skills/bab/SKILL.md', keys);
+  const payload = JSON.parse(Buffer.from(original.envelope.payload, 'base64').toString('utf8'));
+  payload.version = '0.3.0';
+  const bytes = Buffer.from(JSON.stringify(payload));
+  const envelope = {payload: bytes.toString('base64'), signature: sign(null, bytes, keys.privateKey).toString('base64')};
+  assert.throws(() => verifyBundle(envelope, original.publicKey), /版本不一致/u);
 });
 test('更新失败回退镜像；同版本只提醒一次；无网络不阻断', async t => {
   const home = await sandbox(t), good = bundle(); let calls = 0;

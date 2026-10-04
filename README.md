@@ -4,7 +4,7 @@
 
 “借个脑子”是一套中文 AI Skills。它帮你学会别人的方法，整理自己的经验，也能在你想不清楚时，问到关键的地方。
 
-当前是 **0.1.1 体验版**。五个入口、中文说明、国内安装包与私有反馈通道已接通。真实新手试用和宿主隐式路由仍待验收。详见 [当前状态](docs/status.md)。
+当前代码是 **0.1.2 分发版**。五个入口、中文上手练习、国内安装包与私有反馈通道已接通。Codex 新会话已开展独立试用；真实新手与其他宿主仍需验收。线上分发版本以官网发行清单为准。详见 [当前状态](docs/status.md)。
 
 ## 你可以怎么说
 
@@ -90,5 +90,8 @@ npm run build
 - [场景验收](docs/evaluation.md)
 - [DeepSeek Harness 适用性](docs/deepseek-harness.md)
 - [参考来源](docs/references.md)
+- [具体吸收了哪些机制](docs/reference-adoption.md)
+- [安装与第一次使用](docs/quickstart.md)
+- [独立试用结果](docs/independent-evaluation.md)
 
 自动化测试覆盖程序约束。自然表达是否选对专家、提问是否有用，需要额外的真实对话与用户试用。

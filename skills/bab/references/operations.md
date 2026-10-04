@@ -10,9 +10,15 @@
 
 `doctor` 查看环境，只探测已知宿主目录是否存在。`help` 列出命令。脚本输出 JSON；退出码非零代表失败，不能当作已完成。
 
+`context 项目路径` 返回规范化的真实路径及任务 scope。后续 route 命令沿用返回值，避免同一个目录因链接写法不同查不到任务。`cli.mjs` 是模块，不是可执行入口。
+
 数据位置由 `BAB_HOME` 覆盖；默认 macOS 是用户 Library/Application Support/borrow-a-brain，Windows 是 LOCALAPPDATA/borrow-a-brain，Linux 是 XDG_DATA_HOME/borrow-a-brain 或 ~/.local/share/borrow-a-brain。
 
 ## 安装
+
+Codex 或 Claude Code 可直接运行 `setup codex 项目绝对路径` 或 `setup claude 项目绝对路径`。默认只预览。结果包含五个 Skill、规则文件路径、完整新增规则和数据目录，并在预览时检查已存在文件的冲突。确认后加 `--apply`。用户明确要求所有项目可用时，用 `--user` 代替项目路径。
+
+Codex 项目目录使用 `.agents/skills` 与 `AGENTS.md`，Claude Code 使用 `.claude/skills` 与 `CLAUDE.md`。下方 JSON 形式供非标准路径或已登记安装使用；升级必须保留原有路径，不能创建第二份安装替代第一份。
 
 准备 JSON：`source` 为下载包的 skills 目录绝对路径，`skillsDir` 为所选宿主的 Skill 目录，`rulesFile` 为宿主实际支持的规则文件，`version` 为包版本，`apply` 初次为 false。
 
@@ -69,9 +75,9 @@ Windows 独立程序卸载时，使用原下载包里的 bab.exe，目标参数�
 | profile-export | 档案 ID + JSON；先预览，确认摘要一致才写入新目录 |
 | profile-delete | 档案 ID；清除本套件内所有版本和对应路由记录 |
 
-版本 JSON 字段：`change`、`boundaries`、`sources[{id,role,ref,date,excerpt}]`、`methods[{name,trigger,action,reason,limits,evidence,sourceIds}]`、`capabilities[{task,when,avoid}]`、`evaluations[{kind,input,output,result,reviewer}]`。
+版本 JSON 字段：`change`、`boundaries`、`sources[{id,role,ref,date,excerpt}]`、`methods[{name,trigger,action,reason,limits,evidence,sourceIds}]`、`capabilities[{task,when,avoid}]`、`evaluations[{kind,input,output,result,reviewer}]`。包内 [版本参数示例](../assets/examples/profile-version.json) 是虚构草稿，测试状态为 unrun；不得直接改成 pass 充当实测。
 
-`evidence` 为 observed 或 inferred；`role` 区分 user、subject、assistant、document、observer；验证 kind 为 known、new、boundary，result 为 pass、fail、unrun。来源缺失和测试失败不能启用。参数结构示例可参考源码包 tests/profiles.test.mjs 中明确标注的合成数据。
+`evidence` 为 observed 或 inferred；`role` 区分 user、subject、assistant、document、observer；验证 kind 为 known、new、boundary，result 为 pass、fail、unrun。来源缺失和测试失败不能启用。
 
 ## 自动分工
 
@@ -81,7 +87,9 @@ Windows 独立程序卸载时，使用原下载包里的 bab.exe，目标参数�
 {"taskId":"当前任务稳定编号","scope":"personal","intent":"向客户解释延期","deliverable":"一段可以直接使用的话","selected":[{"id":"实际档案ID","role":"lead","responsibility":"组织原因和补救措施","why":"该档案有对应的沟通方法"}],"excludedIds":[]}
 ```
 
-`route-save 参数文件` 检查唯一主责、最多 3 人、档案范围和版本；`route-load 任务编号 范围` 恢复固定版本。选择 0 人是正常情况。不得只写计划就声称各专家已参与。
+`role` 只允许 lead（主责）、contributor（补充）、reviewer（检查），多人时恰好一个 lead。`route-save 参数文件` 检查唯一主责、最多 3 人、档案范围和版本；`route-load 任务编号 范围` 恢复固定版本。选择 0 人是正常情况。不得只写计划就声称各专家已参与。
+
+`route-list 范围 [关键词]` 在当前范围查最近 10 项任务，无原始资料。用户说“接着上次那个”时由此找到 taskId。`route-checkpoint 任务编号 参数文件` 保存获准的最小进度，格式为 `{"scope":"personal","status":"active","summary":"已经确认的结果","next":"下次继续什么"}`；完成状态用 done。它不取代任务交付，也不授权任何外部操作。
 
 ## 故障
 

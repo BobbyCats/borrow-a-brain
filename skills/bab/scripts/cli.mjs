@@ -9,8 +9,9 @@ import {install, uninstall} from './install.mjs';
 import {draftFeedback, sendFeedback, feedbackStatus, recordCorrection, resourceGate} from './feedback.mjs';
 import {checkUpdate, applyUpdate} from './update.mjs';
 import {createProfile, listProfiles, saveProfileVersion, getProfile, resolveProfile, activateProfile, deleteProfile, exportProfile} from './profiles.mjs';
-import {routingCatalog, saveRoute, loadRoute} from './routing.mjs';
+import {routingCatalog, saveRoute, loadRoute, listRoutes, checkpointRoute} from './routing.mjs';
 import {readConfig, saveConfig} from './config.mjs';
+import {setup} from './setup.mjs';
 
 export async function main(argv = process.argv.slice(2)) {
   const [command = 'help', ...args] = argv; const home = dataHome();
@@ -18,6 +19,11 @@ export async function main(argv = process.argv.slice(2)) {
   const json = async file => {if (!file) throw new Error('请提供 JSON 参数文件。'); return JSON.parse(await fs.readFile(file, 'utf8'));};
   const commands = {
     doctor: () => doctor(home),
+    context: async () => {
+      const project = await fs.realpath(args[0] || process.cwd());
+      if (!(await fs.stat(project)).isDirectory()) throw new Error('项目路径必须是目录。');
+      return {project, scope: `project:${project}`, dataHome: home};
+    },
     'config-get': () => readConfig(home),
     'config-set': async () => saveConfig(home, await json(args[0])),
     'profile-create': async () => createProfile(home, await json(args[0])),
@@ -31,6 +37,8 @@ export async function main(argv = process.argv.slice(2)) {
     'route-catalog': () => routingCatalog(home, args[0] || 'personal'),
     'route-save': async () => saveRoute(home, await json(args[0])),
     'route-load': () => loadRoute(home, args[0], args[1] || 'personal'),
+    'route-list': () => listRoutes(home, {scope: args[0] || 'personal', query: args[1] || ''}),
+    'route-checkpoint': async () => checkpointRoute(home, args[0], await json(args[1])),
     'history-grant': async () => grantHistory(home, await json(args[0])),
     'history-read': () => readHistory(home, args[0], {limit: args[1] ? Number(args[1]) : 10}),
     'history-revoke': () => revokeHistory(home, args[0]),
@@ -40,6 +48,11 @@ export async function main(argv = process.argv.slice(2)) {
     'memory-replace': async () => supersedeRule(home, args[0], await json(args[1])),
     'memory-forget': () => forgetRule(home, args[0]),
     install: async () => install(home, await json(args[0])),
+    setup: () => {
+      const [host, ...rest] = args;
+      if (rest.some(a => a.startsWith('--') && !['--apply', '--user'].includes(a)) || rest.filter(a => !a.startsWith('--')).length > 1) throw new Error('用法：setup codex|claude 项目路径 [--apply]；全局安装用 --user 代替项目路径。');
+      return setup(home, {host, project: rest.find(a => !a.startsWith('--')), global: rest.includes('--user'), apply: rest.includes('--apply')});
+    },
     uninstall: () => uninstall(home, args[0]),
     'feedback-draft': async () => draftFeedback(home, await json(args[0])),
     'feedback-send': () => sendFeedback(home, args[0], args[1]),

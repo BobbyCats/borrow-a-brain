@@ -32,6 +32,8 @@ export function verifyBundle(envelope, publicKey) {
     if (size > MAX || createHash('sha256').update(content).digest('hex') !== row.sha256) throw new Error('更新文件大小或校验值无效。');
   }
   if (!seen.has('skills/bab/skill.md')) throw new Error('更新包缺少总入口。');
+  const versionFile = payload.files.find(row => row.path === 'skills/bab/assets/version.json');
+  if (!versionFile || JSON.parse(Buffer.from(versionFile.content, 'base64').toString('utf8')).version !== payload.version) throw new Error('更新声明与程序版本不一致。');
   if (typeof payload.notes !== 'string' || payload.notes.length > 8000) throw new Error('更新包缺少可阅读的变化说明。');
   return payload;
 }
