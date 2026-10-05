@@ -1,5 +1,16 @@
 # 验证回执
 
+## 0.1.4 分发验证（2026-10-05）
+
+- 本机 45 项测试、Skill 元数据、文档链接和脚本语法检查通过。
+- 三平台 CI 的源码测试与原生程序构建、安装、升级、卸载通过。
+- 四种最终 ZIP 的 CRC、版本、SHA-256、Markdown 链接和私有材料扫描通过。
+- 真实 0.1.1 CLI 使用旧包公钥升级至 0.1.4 签名包，确认记忆、原规则和反馈地址保留。
+- 最终源码与 Mac ZIP 在 macOS 实跑安装、跨进程记忆、升级、卸载；Windows/Linux 最终 ZIP 未另做真人宿主验收。
+- CI 开发构建按公开文件清单组装，包含许可与启动器源码，不包含作者运维文档。
+
+历史运行回执已保留归档。当前持续集成结果见 [GitHub Actions](https://github.com/BobbyCats/borrow-a-brain/actions)。官网版本以 [发行清单](https://jclab.top/downloads/borrow-a-brain/releases.json) 为准。
+
 ## 0.1.3 公开前修复（2026-10-05）
 
 - 五项审查问题已修复。新增六项自动回归，覆盖目录祖先链接、规则目录越界、卸载前路径变化、包内版本、旧回执兼容、进度复核、多安装更新和反馈查询参数。
@@ -7,7 +18,7 @@
 - 源码和 Mac arm64 独立程序分别通过安装、跨进程记忆、合成签名升级、升级后启动、卸载及个人资料保留。
 - 官网安装说明改为按包内命令和版本安装，保留旧包说明；本地网站构建 96 个文件、127 项静态检查通过。此项不表示线上说明已经替换。
 - 独立代理复测 12/12 场景通过，包含相同分工重存、变更目标/方法后的复核状态、解除复核、跨范围防覆盖、三份安装的独立检查与提醒、三种反馈 URL。只用虚构材料和模拟网络，没有新增真实用户会话。
-- [ef537f1 的六项 CI](https://github.com/BobbyCats/borrow-a-brain/actions/runs/37259035419) 全部通过。Windows 为 43 项通过、2 项既有符号链接测试按环境跳过；新增目录 junction 越界回归实际运行通过。三个平台的独立程序安装、升级、卸载均通过。
+- ef537f1 的六项 CI 全部通过。Windows 为 43 项通过、2 项既有符号链接测试按环境跳过；新增目录 junction 越界回归实际运行通过。三个平台的独立程序安装、升级、卸载均通过。
 - 四个最终 ZIP 的 CRC、SHA-256、版本、五个入口和私有文件扫描通过。最终源码/Mac ZIP 在本机解压后实跑维护链；Windows/Linux 最终 ZIP 未另做实机运行，对应程序已通过本次 CI。
 - 使用已公开 0.1.1 ZIP 和已安装的 0.1.1 CLI，升级到真实 0.1.3 签名包。旧包中的可信公钥验证通过，原有规则、确认记忆和反馈地址保留；升级后 context、route-list 运行正常。
 
@@ -17,7 +28,7 @@
 
 - `npm test`：39 项通过，0 失败，0 跳过（macOS 本机）。
 - `npm run validate`：5 个 Skill、47 个相对链接、32 个脚本检查通过；五个入口均通过 skill-creator 校验。
-- [138c65a 的六项 CI](https://github.com/BobbyCats/borrow-a-brain/actions/runs/37228672353)：macOS、Windows、Linux 的 Node 测试与三个独立程序构建、安装、签名升级、卸载均通过。Windows 两项受管理员符号链接权限影响的测试按既有说明跳过。
+- 138c65a 的六项 CI：macOS、Windows、Linux 的 Node 测试与三个独立程序构建、安装、签名升级、卸载均通过。Windows 两项受管理员符号链接权限影响的测试按既有说明跳过。
 - 独立代理共试用 10 个普通话场景，完成 8 个真实 Codex CLI 新会话。其中 0.1.2 四次新会话覆盖方法学习、自我认识、双方法任务恢复、全新任务自动选用一份方法。见 [独立试用](independent-evaluation.md)。中断的帮助会话不计通过。
 - 四个最终 ZIP：通用源码、macOS arm64、Windows x64、Linux x64。逐包核对 ZIP CRC、SHA-256、五个入口、版本与私有资料扫描。
 - 最终源码包与 Mac 包在 macOS 解压后实跑安装、跨进程记忆检索、签名升级、升级后运行、卸载与资料保留。Windows/Linux 使用本次对应 CI 构建；最终装配 ZIP 未在两平台另做实机重跑。
@@ -63,7 +74,7 @@
 
 ## 跨平台 CI
 
-[adbd851 的六项 CI](https://github.com/BobbyCats/borrow-a-brain/actions/runs/37223804560) 全部通过：macOS、Windows、Linux 的 Node 检查，以及三个平台的独立程序构建和安装、升级、卸载验证。
+adbd851 的六项 CI 全部通过：macOS、Windows、Linux 的 Node 检查，以及三个平台的独立程序构建和安装、升级、卸载验证。
 
 Windows 的两个符号链接测试因非管理员创建链接的环境条件明确跳过；它们在 macOS/Linux 执行。Windows 换行导致的格式误判已修正。Windows 独立程序卸载使用原下载包中的程序，避免尝试删除自身。
 
