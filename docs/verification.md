@@ -8,6 +8,7 @@
 - 真实 0.1.1 CLI 使用旧包公钥升级至 0.1.4 签名包，确认记忆、原规则和反馈地址保留。
 - 最终源码与 Mac ZIP 在 macOS 实跑安装、跨进程记忆、升级、卸载；Windows/Linux 最终 ZIP 未另做真人宿主验收。
 - CI 开发构建按公开文件清单组装，包含许可与启动器源码，不包含作者运维文档。
+- 官网已分发 0.1.4；四包经正式域名下载，哈希与包内版本一致。线上固定更新包与 latest.json 字节一致，并使用旧版公钥验签通过。0.1.1 下载保留。
 
 历史运行回执已保留归档。当前持续集成结果见 [GitHub Actions](https://github.com/BobbyCats/borrow-a-brain/actions)。官网版本以 [发行清单](https://jclab.top/downloads/borrow-a-brain/releases.json) 为准。
 
