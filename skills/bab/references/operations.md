@@ -4,8 +4,8 @@
 
 ## 运行入口
 
-- 源码包：`node /绝对路径/borrow-a-brain/bin/bab.mjs <命令> ...`
-- 安装后的源码：`node /绝对路径/skills/bab/scripts/run.mjs <命令> ...`
+- 源码仓库：`node /绝对路径/borrow-a-brain/bin/bab.mjs <命令> ...`
+- 通用源码安装包或安装后的源码：`node /绝对路径/skills/bab/scripts/run.mjs <命令> ...`
 - 独立包：`/绝对路径/skills/bab/bin/bab <命令> ...`；Windows 文件名 `bab.exe`。只有包中实际存在程序且平台已验证时使用。
 
 `doctor` 查看环境，只探测已知宿主目录是否存在。`help` 列出命令。脚本输出 JSON；退出码非零代表失败，不能当作已完成。
