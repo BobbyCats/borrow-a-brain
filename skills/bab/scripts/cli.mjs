@@ -60,7 +60,7 @@ export async function main(argv = process.argv.slice(2)) {
     'feedback-delete': () => mutateState(home, s => {const n = s.feedback.length; s.feedback = s.feedback.filter(x => x.report.id !== args[0]); return {deleted: n - s.feedback.length, serverCopyDeleted: false};}),
     'correction': async () => recordCorrection(home, args[0], await json(args[1])),
     'resource': async () => resourceGate(home, await json(args[0])),
-    'update-check': async () => checkUpdate(home, await json(args[0]), args[1], {force: args.includes('--force')}),
+    'update-check': async () => checkUpdate(home, await json(args[0]), args[1], {skillsDir: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..'), force: args.includes('--force')}),
     'update-apply': async () => applyUpdate(home, await json(args[0])),
     'data-clear': async () => {
       if (args[0] !== '--confirmed') throw new Error('清除全部派生记忆与授权需要用户确认；传入 --confirmed。');

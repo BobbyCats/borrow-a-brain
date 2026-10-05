@@ -48,7 +48,8 @@ export async function sendFeedback(home, id, approvalHash, {fetcher = fetch} = {
 export async function feedbackStatus(home, id, {fetcher = fetch} = {}) {
   const state = await readState(home); const row = state.feedback.find(x => x.report.id === id);
   if (!row?.receipt || !row.endpoint) throw new Error('尚无已发送回执。');
-  const url = new URL(`${row.endpoint.replace(/\/$/u, '')}/${encodeURIComponent(id)}`);
+  const url = new URL(endpointURL(row.endpoint));
+  url.pathname = `${url.pathname.replace(/\/$/u, '')}/${encodeURIComponent(id)}`;
   const res = await fetcher(url, {headers: {authorization: `Bearer ${row.receipt.token}`}, redirect: 'error', signal: AbortSignal.timeout(5000)});
   if (!res.ok) throw new Error(`查询失败：HTTP ${res.status}`);
   return res.json();

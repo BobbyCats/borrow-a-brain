@@ -29,6 +29,10 @@ export async function saveRoute(home, input) {
   return mutateState(home, s => {
     const previous = s.tasks[`route:${taskId}`];
     if (previous && previous.scope !== scope) throw new Error('任务编号已属于其他范围，请生成新编号。');
+    if (previous?.checkpoint) {
+      const changed = previous.intent !== plan.intent || previous.deliverable !== plan.deliverable || JSON.stringify(previous.selected) !== JSON.stringify(plan.selected);
+      plan.checkpoint = {...previous.checkpoint, ...(changed ? {needsReview: true} : {})};
+    }
     s.tasks[`route:${taskId}`] = plan;
     return {...plan, selectionBy: 'host-model', execution: 'one-owner-sequential', note: '这是方法分工，不是后台代理已启动的证明。'};
   });
@@ -66,5 +70,5 @@ export async function loadRoute(home, taskId, scope = 'personal') {
     if (!['active', 'historical'].includes(p.status)) throw new Error('原方法版本不可用，请重新选用。');
     profiles.push(p);
   }
-  return {status: 'ready', plan, profiles};
+  return {status: plan.checkpoint?.needsReview ? 'needs-review' : 'ready', plan, profiles};
 }

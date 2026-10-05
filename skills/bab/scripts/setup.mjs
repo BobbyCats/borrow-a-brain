@@ -12,9 +12,8 @@ export async function setup(home, {host, project, global = false, apply = false}
   const root = global ? userHome : await fs.realpath(project);
   if (!(await fs.stat(root)).isDirectory()) throw new Error('项目路径必须是目录。');
   const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-  const version = JSON.parse(await fs.readFile(path.join(source, 'bab/assets/version.json'), 'utf8')).version;
   const skillsDir = path.join(root, host === 'codex' ? '.agents/skills' : '.claude/skills');
   const rulesFile = path.join(root, global ? host === 'codex' ? '.codex/AGENTS.md' : '.claude/CLAUDE.md' : host === 'codex' ? 'AGENTS.md' : 'CLAUDE.md');
-  return {...await install(home, {source, skillsDir, rulesFile, version, apply}), host,
+  return {...await install(home, {source, skillsDir, rulesFile, scopeRoot: root, apply}), host,
     scope: global ? 'user' : 'project', nextCheck: '开启该目录的新会话，说“我有件事拿不定主意，你帮我捋一捋”，检查是否展示实际调用。'};
 }

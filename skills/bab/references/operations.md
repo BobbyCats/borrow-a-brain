@@ -20,7 +20,7 @@ Codex 或 Claude Code 可直接运行 `setup codex 项目绝对路径` 或 `setu
 
 Codex 项目目录使用 `.agents/skills` 与 `AGENTS.md`，Claude Code 使用 `.claude/skills` 与 `CLAUDE.md`。下方 JSON 形式供非标准路径或已登记安装使用；升级必须保留原有路径，不能创建第二份安装替代第一份。
 
-准备 JSON：`source` 为下载包的 skills 目录绝对路径，`skillsDir` 为所选宿主的 Skill 目录，`rulesFile` 为宿主实际支持的规则文件，`version` 为包版本，`apply` 初次为 false。
+准备 JSON：`source` 为下载包的 skills 目录绝对路径，`skillsDir` 为所选宿主的 Skill 目录，`rulesFile` 为宿主实际支持的规则文件，`apply` 初次为 false。版本从包内自动读取；若传 `version`，必须与包一致。项目安装还传 `scopeRoot` 为用户选定的项目目录，setup 会自动填写。预览中的 `resolvedPaths` 是真实位置；目录链接越过所选范围时停止，不能把共享目录当作项目目录。
 
 运行 `install 参数文件` 得到预览。用户同意位置与自动路由规则后，将 `apply` 改为 true 并执行。安装保留其他规则和同名外来 Skill；如果冲突，先展示差异。宿主是否加载要通过新会话实际试用确认。
 
@@ -90,6 +90,8 @@ Windows 独立程序卸载时，使用原下载包里的 bab.exe，目标参数�
 `role` 只允许 lead（主责）、contributor（补充）、reviewer（检查），多人时恰好一个 lead。`route-save 参数文件` 检查唯一主责、最多 3 人、档案范围和版本；`route-load 任务编号 范围` 恢复固定版本。选择 0 人是正常情况。不得只写计划就声称各专家已参与。
 
 `route-list 范围 [关键词]` 在当前范围查最近 10 项任务，无原始资料。用户说“接着上次那个”时由此找到 taskId。`route-checkpoint 任务编号 参数文件` 保存获准的最小进度，格式为 `{"scope":"personal","status":"active","summary":"已经确认的结果","next":"下次继续什么"}`；完成状态用 done。它不取代任务交付，也不授权任何外部操作。
+
+重复保存相同分工保留 checkpoint。目标、交付或方法分工改变后，checkpoint.needsReview 为 true，route-load 返回 needs-review。先核对旧摘要与下一步是否仍适用，再用 route-checkpoint 写入核实后的进度，解除待复核状态。不能直接把旧进度当作当前结论。
 
 ## 故障
 

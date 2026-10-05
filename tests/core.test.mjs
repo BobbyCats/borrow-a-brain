@@ -109,6 +109,8 @@ test('历史适配器不跟随目录内的符号链接', async t => {
 async function packageFixture(home) {
   const source = path.join(home, 'package', 'skills'); await fs.mkdir(path.join(source, 'bab'), {recursive: true});
   await fs.writeFile(path.join(source, 'bab', 'SKILL.md'), '---\nname: bab\ndescription: test\n---\n# Test');
+  await fs.mkdir(path.join(source, 'bab', 'assets'));
+  await fs.writeFile(path.join(source, 'bab', 'assets', 'version.json'), JSON.stringify({version: '0.1.0'}));
   return {source, skillsDir: path.join(home, 'host', 'skills'), rulesFile: path.join(home, 'host', 'AGENTS.md'), version: '0.1.0'};
 }
 test('安装可预览、幂等，保留原规则；卸载保留记忆', async t => {
@@ -152,6 +154,7 @@ test('源代码更新保留已登记的独立运行程序', async t => {
   await install(home, {...config, apply: true});
   await fs.rm(path.join(config.source, 'bab', 'bin'), {recursive: true});
   await fs.appendFile(path.join(config.source, 'bab', 'SKILL.md'), '\nupdated');
+  await fs.writeFile(path.join(config.source, 'bab', 'assets', 'version.json'), JSON.stringify({version: '0.2.0'}));
   await install(home, {...config, apply: true, version: '0.2.0'});
   assert.equal(await fs.readFile(path.join(config.skillsDir, 'bab', 'bin', 'bab'), 'utf8'), 'synthetic runtime');
   await uninstall(home, config.skillsDir);

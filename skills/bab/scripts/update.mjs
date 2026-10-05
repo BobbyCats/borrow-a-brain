@@ -49,12 +49,16 @@ async function boundedResponse(res) {
   return Buffer.concat(parts).toString('utf8');
 }
 
-export async function checkUpdate(home, config, currentVersion, {force = false, now = Date.now(), fetcher = fetch} = {}) {
+export async function checkUpdate(home, config, currentVersion, {skillsDir, force = false, now = Date.now(), fetcher = fetch} = {}) {
   compareVersions(currentVersion, '0.0.0');
   if (!Array.isArray(config.sources) || !config.sources.length || !config.publicKey) return {status: 'unconfigured', message: '作者尚未配置可验证的更新源；当前版本仍可使用。'};
   if (config.sources.length > 3) throw new Error('更新源最多 3 个。');
+  // CLI supplies its own installation directory. Library callers without an installation
+  // still get version-specific checks, never the old shared seven-day suppression.
+  const key = createHash('sha256').update(JSON.stringify([skillsDir ? path.resolve(skillsDir) : null, currentVersion, config.sources, config.publicKey])).digest('hex');
   const state = await readState(home);
-  if (!force && state.maintenance.lastCheck && now - state.maintenance.lastCheck < 7 * 86400000) return {status: 'not-due'};
+  const checked = state.maintenance.checks?.[key];
+  if (!force && checked?.lastCheck && now - checked.lastCheck < 7 * 86400000) return {status: 'not-due'};
   const failures = [];
   for (const source of config.sources) {
     try {
@@ -65,17 +69,20 @@ export async function checkUpdate(home, config, currentVersion, {force = false, 
       const envelope = JSON.parse(await boundedResponse(response));
       const payload = verifyBundle(envelope, config.publicKey);
       const isNew = compareVersions(payload.version, currentVersion) > 0;
-      const notify = isNew && state.maintenance.notifiedVersion !== payload.version;
-      await mutateState(home, s => {
-        s.maintenance.lastCheck = now;
-        if (notify) s.maintenance.notifiedVersion = payload.version;
+      const notify = await mutateState(home, s => {
+        s.maintenance.checks ||= {};
+        const check = s.maintenance.checks[key] ||= {};
+        const notify = isNew && check.notifiedVersion !== payload.version;
+        check.lastCheck = now;
+        if (notify) check.notifiedVersion = payload.version;
+        return notify;
       });
       return {status: isNew ? 'available' : 'current', version: payload.version, currentVersion,
         notify, notes: payload.notes, source: url.href, envelope: isNew ? envelope : undefined};
     } catch (e) {failures.push({source, error: e.message});}
   }
   // A failed check is not an update failure and must not interrupt the user's task.
-  await mutateState(home, s => {s.maintenance.lastCheck = now;});
+  await mutateState(home, s => {s.maintenance.checks ||= {}; s.maintenance.checks[key] = {...s.maintenance.checks[key], lastCheck: now};});
   return {status: 'offline-or-invalid', failures, message: '未取得有效更新，继续使用当前版本；可手动重查。'};
 }
 
