@@ -67,14 +67,15 @@ export function parseSession(raw, adapter, ref) {
 }
 
 async function candidates(root, maxFiles = 3000) {
-  const files = []; let visited = 0; let capped = false;
+  const files = []; const excluded = {}; const count = reason => {excluded[reason] = (excluded[reason] || 0) + 1;}; let visited = 0; let capped = false;
   async function walk(dir, depth) {
-    if (depth > 8 || capped) return;
+    if (capped) return;
+    if (depth > 8) {count('depth-limit'); return;}
     const entries = await fs.readdir(dir, {withFileTypes: true});
     for (const entry of entries) {
       if (++visited > maxFiles) {capped = true; break;}
-      if (entry.isSymbolicLink()) continue;
-      if (/^(archived_sessions|subagents|\.git|node_modules)$/u.test(entry.name)) continue;
+      if (entry.isSymbolicLink()) {count('symbolic-link'); continue;}
+      if (/^(archived_sessions|subagents|\.git|node_modules)$/u.test(entry.name)) {count(entry.name === 'archived_sessions' ? 'archived-directory' : entry.name === 'subagents' ? 'subagent-directory' : 'ignored-directory'); continue;}
       const file = path.join(dir, entry.name);
       if (entry.isDirectory()) await walk(file, depth + 1);
       else if (entry.isFile() && /\.jsonl?$/u.test(entry.name)) files.push(file);
@@ -82,7 +83,7 @@ async function candidates(root, maxFiles = 3000) {
   }
   await walk(root, 0);
   const stats = await Promise.all(files.map(async file => ({file, stat: await fs.stat(file)})));
-  return {files: stats.sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs), capped};
+  return {files: stats.sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs), capped, excluded};
 }
 
 export async function readHistory(home, grantId, {limit = 10} = {}) {
@@ -93,20 +94,27 @@ export async function readHistory(home, grantId, {limit = 10} = {}) {
   if (await fs.realpath(grant.root) !== grant.root) throw new Error('记录根目录已改变，请重新授权。');
   const inventory = await candidates(grant.root);
   const sessions = []; const skipped = []; const ids = new Set();
+  const excluded = {...inventory.excluded};
+  const count = reason => {excluded[reason] = (excluded[reason] || 0) + 1;};
+  let inspected = 0;
   for (const item of inventory.files) {
     if (sessions.length >= limit) break;
+    inspected++;
     const real = await fs.realpath(item.file);
     if (!isWithin(grant.root, real)) throw new Error('记录路径越过授权目录。');
     if (item.stat.size > MAX_BYTES) {skipped.push({file: item.file, reason: '超过 2 MiB，请提供指定范围的导出'}); continue;}
     try {
       const session = parseSession(await fs.readFile(real, 'utf8'), grant.adapter, item.file);
-      if (session.child || !session.messages.length || ids.has(session.id)) continue;
-      if (grant.project && session.project !== grant.project) continue;
+      if (session.child) {count('subagent-session'); continue;}
+      if (!session.messages.length) {count('no-readable-messages'); continue;}
+      if (ids.has(session.id)) {count('duplicate-session'); continue;}
+      if (grant.project && session.project !== grant.project) {count('outside-project'); continue;}
       ids.add(session.id); sessions.push(session);
     } catch (e) {skipped.push({file: item.file, reason: e.message});}
   }
   // Raw chat is returned only to the authorized host; it is never added to state.json.
   return {adapter: grant.adapter, requested: limit, returned: sessions.length,
-    completeness: inventory.capped || skipped.length || sessions.some(s => s.malformed) ? 'partial' : 'within-selected-directory',
-    inventoryCapped: inventory.capped, skipped, sessions};
+    completeness: inventory.capped || inspected < inventory.files.length || Object.keys(excluded).length || skipped.length || sessions.some(s => s.malformed) ? 'partial' : 'within-selected-directory',
+    inventoryCapped: inventory.capped, excluded, inspectedFiles: inspected, uninspectedCandidates: inventory.files.length - inspected,
+    exclusionUnit: '目录按目录计数，未遍历其内容；会话和链接各按项计数，非遗漏会话总数', skipped, sessions};
 }

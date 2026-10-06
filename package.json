@@ -1,6 +1,6 @@
 {
   "name": "@bobbycats/borrow-a-brain",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "type": "module",
   "description": "借个脑子：借别人的思路，理自己的难题。",

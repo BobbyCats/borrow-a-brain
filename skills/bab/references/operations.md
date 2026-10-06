@@ -40,7 +40,7 @@ Windows 独立程序卸载时，使用原下载包里的 bab.exe，目标参数�
 
 `userApproved` 只能在用户已同意后填写。有效期 1–30 天。整个 root 都是授权读取边界；可选 `project` 是返回结果过滤条件，不是目录访问权限。需要严格项目隔离时，选择项目导出目录，或使用宿主提供的按会话读取 API。
 
-`history-read 授权编号 10`，单次最多 20 个。按文件修改时间选取近会话；这不等于平台 UI 精确的最近排序。跳过子代理、归档目录、链接和超过 2 MiB 的文件，披露遗漏。支持 Codex JSONL、Claude JSONL，以及消息数组或 `{messages:[...]}` 的 JSON 导出；其他格式先人工确认导出方法。
+`history-read 授权编号 10`，单次最多 20 个。按文件修改时间选取近会话；这不等于平台 UI 精确的最近排序。跳过子代理、归档目录、链接和超过 2 MiB 的文件，披露遗漏。回执的 excluded 按原因计数；目录不遍历内容，只按目录计数。uninspectedCandidates 表示因条数限制未检查的候选文件，不能当作可用会话总数。存在排除、损坏、限额或扫描截断时 completeness 为 partial。支持 Codex JSONL、Claude JSONL，以及消息数组或 `{messages:[...]}` 的 JSON 导出；其他格式先人工确认导出方法。
 
 `history-revoke 授权编号` 立即撤销后续读取。原始聊天不复制进状态文件。
 
@@ -52,13 +52,19 @@ Windows 独立程序卸载时，使用原下载包里的 bab.exe，目标参数�
 {"kind":"preference","status":"candidate","statement":"工作报告先给结论","scope":"personal","conditions":"正式工作报告","exceptions":"自由聊天不强制","sources":[{"role":"user","ref":"会话编号#消息定位","excerpt":"必要摘录"}],"outcome":"尚未验证"}
 ```
 
+sources 可附带 [多媒体证据字段](people.md#多媒体证据字段)，保存与查询保留原始定位、身份和读取覆盖。
+
 类型为 preference / decision / method / observation。确认状态 `confirmed` 需要用户证据和 `userConfirmed:true`。不能把助手曾建议的做法直接记成用户习惯。
 
 - `memory-list 范围`：查看条目和证据，默认 personal。
 - `memory-query '关键词' 范围`：默认最多 5 条已确认规则，属于关键词筛选。
 - `memory-replace 旧编号 参数文件`：新确认规则替代旧规则。
 - `memory-forget 编号`：清除该规则整个修订链。
-- `data-clear --confirmed`：用户确认后清除全部派生记忆、人物档案、历史授权、反馈草稿和任务分工；保留安装回执。未删除宿主聊天或服务端反馈。
+- `data-clear --confirmed`：用户确认后清除全部派生记忆、人物档案、素材库、历史授权、反馈草稿和任务分工；保留安装回执。未删除宿主聊天或服务端反馈。清除以一次加锁提交为界，提交之前的数据统一重置，之后用户新建的数据不在清除范围。文件清理失败会报错，不宣称彻底删除。
+
+## 素材库
+
+素材导入、覆盖、检索、删除和失败清理见 [专属素材库](library.md)。material-import / material-delete 默认预览，明确入库或删除授权后核对预览并按摘要应用。当前副本的 id、revision、sha256 进入来源证据，旧版本更新后必须复核派生结论。
 
 ## 人物档案
 
@@ -77,7 +83,7 @@ Windows 独立程序卸载时，使用原下载包里的 bab.exe，目标参数�
 
 版本 JSON 字段：`change`、`boundaries`、`sources[{id,role,ref,date,excerpt}]`、`methods[{name,trigger,action,reason,limits,evidence,sourceIds}]`、`capabilities[{task,when,avoid}]`、`evaluations[{kind,input,output,result,reviewer}]`。包内 [版本参数示例](../assets/examples/profile-version.json) 是虚构草稿，测试状态为 unrun；不得直接改成 pass 充当实测。
 
-`evidence` 为 observed 或 inferred；`role` 区分 user、subject、assistant、document、observer；验证 kind 为 known、new、boundary，result 为 pass、fail、unrun。来源缺失和测试失败不能启用。
+`evidence` 为 observed 或 inferred；`role` 区分 user、subject、assistant、document、observer；验证 kind 为 known、new、boundary，result 为 pass、fail、unrun。来源缺失和测试失败不能启用。多媒体来源可附 material 回执，见 [证据字段](people.md#多媒体证据字段)。导出可分享引用和试用摘要见 [导出来源与试用](people.md#导出来源与试用)。
 
 ## 自动分工
 
@@ -87,7 +93,7 @@ Windows 独立程序卸载时，使用原下载包里的 bab.exe，目标参数�
 {"taskId":"当前任务稳定编号","scope":"personal","intent":"向客户解释延期","deliverable":"一段可以直接使用的话","selected":[{"id":"实际档案ID","role":"lead","responsibility":"组织原因和补救措施","why":"该档案有对应的沟通方法"}],"excludedIds":[]}
 ```
 
-`role` 只允许 lead（主责）、contributor（补充）、reviewer（检查），多人时恰好一个 lead。`route-save 参数文件` 检查唯一主责、最多 3 人、档案范围和版本；`route-load 任务编号 范围` 恢复固定版本。选择 0 人是正常情况。不得只写计划就声称各专家已参与。
+`role` 只允许 lead（主责）、contributor（补充）、reviewer（检查），多人时恰好一个 lead。`route-save 参数文件` 检查唯一主责、最多 3 人、档案范围和版本；`route-load 任务编号 范围` 恢复固定版本。excludedIds 同任务只增不隐式清除。用户明确解除时传 releaseExcludedIds 与 userApprovedExclusionChange:true；list/load 都带回排除项。选择 0 人是正常情况。不得只写计划就声称各专家已参与。
 
 `route-list 范围 [关键词]` 在当前范围查最近 10 项任务，无原始资料。用户说“接着上次那个”时由此找到 taskId。`route-checkpoint 任务编号 参数文件` 保存获准的最小进度，格式为 `{"scope":"personal","status":"active","summary":"已经确认的结果","next":"下次继续什么"}`；完成状态用 done。它不取代任务交付，也不授权任何外部操作。
 

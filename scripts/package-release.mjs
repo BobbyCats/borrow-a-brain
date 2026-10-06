@@ -43,8 +43,10 @@ export async function packageRelease(input) {
     await fs.copyFile(path.join(root, 'scripts/runtime.mjs'), path.join(source, 'runtime.mjs'));
     await fs.mkdir(path.join(source, 'docs'));
     await fs.copyFile(path.join(root, 'docs/quickstart.md'), path.join(source, 'docs/quickstart.md'));
-    await fs.writeFile(path.join(source, '开始使用.md'), '# 借个脑子：从这里开始\n\n把这个文件夹交给你正在使用的 AI，说：“帮我安装借个脑子，先给我看具体变化。”\n\n[打开安装与上手说明](docs/quickstart.md)\n\n[三次上手练习](skills/bab/assets/getting-started.md)\n');
-    await fs.writeFile(path.join(source, 'README.md'), `# 借个脑子 · Borrow a Brain\n\n**借别人的思路，理自己的难题。**\n\n版本 ${version}。从文章、访谈和对话中提炼可复用的方法，在写作、沟通和决策时调用。人物档案和个人记忆保存在本地。\n\n[使用指南](docs/quickstart.md) · [上手练习](skills/bab/assets/getting-started.md) · [更新记录](CHANGELOG.md)\n\n## 安装\n\n在能操作本地文件、执行命令的 Codex 或 Claude Code 中打开这个文件夹，输入：\n\n> 帮我安装“借个脑子”。先告诉我会装在哪里、改哪些文件，保留我原来的配置。\n\n确认安装后，在所选项目中开启新会话。完整步骤和命令见使用指南。\n\n## 使用\n\n直接说你要做什么，AI 会按任务选择 Skill，并显示实际调用的名称。\n\n| Skill | 用途 |\n| --- | --- |\n| 借个脑子 | 按任务选择流程和已保存的方法 |\n| 借个高手 | 从材料中提炼方法，试用后保存 |\n| 懂我一点 | 整理自己的习惯和偏好，确认后保存 |\n| 问到点上 | 追问关键问题，给出推荐和理由 |\n| 带我上手 | 使用指导、更新、反馈和数据管理 |\n\n安装包没有预装真人档案。提供材料并确认启用后，可以点名使用，也可以让 AI 按任务选用。\n\n读取历史前确认范围，反馈发送前预览正文。交给 AI 的材料仍受所用应用的数据处理规则约束。\n\n[官网](${author.website}) · [MIT 许可证](LICENSE) · [第三方声明](THIRD_PARTY_NOTICES.md)\n`);
+    await fs.writeFile(path.join(source, '开始使用.md'), '# 借个脑子：从这里开始\n\n把这个文件夹交给你正在使用的 AI，说：“帮我安装借个脑子，先给我看具体变化。”\n\n[打开安装与上手说明](docs/quickstart.md)\n\n[三次上手练习](skills/bab/assets/getting-started.md)\n\n[素材怎么给](skills/bab/assets/materials-guide.md)\n');
+    // The public introduction is shared with the repository; developer links stay outside the package.
+    const readme = (await fs.readFile(path.join(root, 'README.md'), 'utf8')).split('<!-- maintainer-docs -->')[0].trimEnd();
+    await fs.writeFile(path.join(source, 'README.md'), readme + `\n\n安装包版本：${version}。\n`);
     const files = [];
     for (const name of Object.keys(await fileMap(path.join(source, 'skills')))) {
       const bytes = await fs.readFile(path.join(source, 'skills', name));

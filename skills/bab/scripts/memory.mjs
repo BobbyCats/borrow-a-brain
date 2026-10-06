@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import {materialReceipt} from './evidence.mjs';
+import {sourceChanges, checkSourceLinks} from './materials.mjs';
 import { boundedString, mutateState, readState } from './store.mjs';
 
 const kinds = new Set(['preference', 'decision', 'method', 'observation']);
@@ -11,7 +13,9 @@ export function validateRule(input) {
   if (!Array.isArray(input.sources) || !input.sources.length || input.sources.length > 20) throw new Error('记忆需要 1–20 项证据来源。');
   const sources = input.sources.map(source => {
     if (!['user', 'assistant', 'tool', 'document'].includes(source.role)) throw new Error('证据需要明确说话人或材料角色。');
-    return {ref: boundedString(source.ref, '来源定位', 2000), role: source.role, excerpt: boundedString(source.excerpt, '必要摘录', 2000)};
+    const receipt = materialReceipt(source.material);
+    if (receipt.material?.coverage === 'unavailable') throw new Error('未读取的材料不能作为记忆证据。');
+    return {...receipt, ref: boundedString(source.ref, '来源定位', 2000), role: source.role, excerpt: boundedString(source.excerpt, '必要摘录', 2000)};
   });
   if (status === 'confirmed' && (!input.userConfirmed || !sources.some(s => s.role === 'user'))) throw new Error('确认记忆需要用户确认和用户证据；AI 推断先保存为候选。');
   return {
@@ -27,6 +31,7 @@ export function validateRule(input) {
 export async function addRule(home, input) {
   const rule = validateRule(input);
   return mutateState(home, state => {
+    checkSourceLinks(rule.sources, state, rule.scope);
     const record = {...rule, id: randomUUID(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()};
     state.rules.push(record); return record;
   });
@@ -34,7 +39,7 @@ export async function addRule(home, input) {
 
 export async function listRules(home, {scope, includeCandidates = true} = {}) {
   const state = await readState(home);
-  return state.rules.filter(r => r.status !== 'superseded' && (includeCandidates || r.status === 'confirmed') && (!scope || r.scope === 'personal' || r.scope === scope));
+  return state.rules.filter(r => r.status !== 'superseded' && (includeCandidates || r.status === 'confirmed') && (!scope || r.scope === 'personal' || r.scope === scope)).map(r => ({...r, sourceChanges: sourceChanges(r.sources, state), sourceStatus: sourceChanges(r.sources, state).length ? 'needs-review' : 'current'}));
 }
 
 export async function queryRules(home, query, scope = 'personal', limit = 5) {
@@ -42,13 +47,14 @@ export async function queryRules(home, query, scope = 'personal', limit = 5) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 20) throw new Error('查询数量应为 1–20。');
   const terms = [...new Set(query.toLowerCase().split(/[\s,，。;；]+/u).filter(Boolean))];
   const rows = await listRules(home, {scope, includeCandidates: false});
-  return rows.map(r => ({...r, score: terms.reduce((n, t) => n + (JSON.stringify([r.statement, r.conditions]).toLowerCase().includes(t) ? 1 : 0), 0)}))
+  return rows.filter(r => r.sourceStatus !== 'needs-review').map(r => ({...r, score: terms.reduce((n, t) => n + (JSON.stringify([r.statement, r.conditions]).toLowerCase().includes(t) ? 1 : 0), 0)}))
     .filter(r => r.score > 0).sort((a, b) => b.score - a.score).slice(0, limit);
 }
 
 export async function supersedeRule(home, id, input) {
   const rule = validateRule(input);
   return mutateState(home, state => {
+    checkSourceLinks(rule.sources, state, rule.scope);
     const previous = state.rules.find(r => r.id === id && r.status !== 'superseded');
     if (!previous) throw new Error('找不到可替代的规则。');
     if (previous.status === 'confirmed' && rule.status !== 'confirmed') throw new Error('候选推断不能替代已确认规则。');

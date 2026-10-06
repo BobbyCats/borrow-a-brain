@@ -4,7 +4,7 @@ import {getProfile, listProfiles} from './profiles.mjs';
 
 // The host model makes the semantic choice. This module enforces scope, versions and ownership.
 export async function routingCatalog(home, scope = 'personal') {
-  return (await listProfiles(home, scope)).filter(p => p.activeVersion).map(({versions, aliases, ...p}) => p);
+  return (await listProfiles(home, scope)).filter(p => p.activeVersion && p.sourceStatus !== 'needs-review').map(({versions, aliases, ...p}) => p);
 }
 
 export async function saveRoute(home, input) {
@@ -16,9 +16,9 @@ export async function saveRoute(home, input) {
   if (new Set(selected.map(p => p.id)).size !== selected.length) throw new Error('同一档案不能重复入选。');
   const result = [];
   for (const choice of selected) {
-    if ((input.excludedIds || []).includes(choice.id)) throw new Error('不能选择用户本次排除的方法。');
     if (!['lead', 'contributor', 'reviewer'].includes(choice.role)) throw new Error('协作角色只支持 lead（主责）、contributor（补充）、reviewer（检查）。');
     const p = await getProfile(home, choice.id, {scope});
+    if (p.sourceStatus === 'needs-review') throw new Error('素材来源已变化，不能自动调用待复核方法。');
     if (p.status !== 'active') throw new Error('自动路由只能选择已启用的版本。');
     if (choice.version && choice.version !== p.version) throw new Error('选中版本已变化，请重新读取能力索引。');
     result.push({id: p.id, name: p.name, version: p.version, role: choice.role,
@@ -29,8 +29,17 @@ export async function saveRoute(home, input) {
   return mutateState(home, s => {
     const previous = s.tasks[`route:${taskId}`];
     if (previous && previous.scope !== scope) throw new Error('任务编号已属于其他范围，请生成新编号。');
+    const ids = (value, label) => {
+      if (!Array.isArray(value) || value.length > 100) throw new Error(`${label}必须是最多 100 项编号的数组。`);
+      return value.map(id => boundedString(id, label, 100));
+    };
+    const additions = ids(input.excludedIds || [], '排除项');
+    const released = ids(input.releaseExcludedIds || [], '解除排除项');
+    if (released.length && input.userApprovedExclusionChange !== true) throw new Error('解除本任务排除项需用户明确同意。');
+    plan.excludedIds = [...new Set([...(previous?.excludedIds || []), ...additions])].filter(id => !released.includes(id));
+    if (result.some(choice => plan.excludedIds.includes(choice.id))) throw new Error('不能选择用户本次排除的方法。');
     if (previous?.checkpoint) {
-      const changed = previous.intent !== plan.intent || previous.deliverable !== plan.deliverable || JSON.stringify(previous.selected) !== JSON.stringify(plan.selected);
+      const changed = previous.intent !== plan.intent || previous.deliverable !== plan.deliverable || JSON.stringify(previous.selected) !== JSON.stringify(plan.selected) || JSON.stringify(previous.excludedIds || []) !== JSON.stringify(plan.excludedIds);
       plan.checkpoint = {...previous.checkpoint, ...(changed ? {needsReview: true} : {})};
     }
     s.tasks[`route:${taskId}`] = plan;
@@ -45,7 +54,7 @@ export async function listRoutes(home, {scope = 'personal', query = '', limit = 
   return Object.entries((await readState(home)).tasks).filter(([key, row]) => key.startsWith('route:') && row?.scope === scope)
     .map(([, row]) => row).filter(row => terms.every(term => `${row.intent} ${row.deliverable} ${row.checkpoint?.summary || ''}`.toLowerCase().includes(term)))
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, limit)
-    .map(({taskId, scope, intent, deliverable, updatedAt, selected, checkpoint}) => ({taskId, scope, intent, deliverable, updatedAt,
+    .map(({taskId, scope, intent, deliverable, updatedAt, selected, excludedIds = [], checkpoint}) => ({taskId, scope, intent, deliverable, updatedAt, excludedIds,
       methods: selected.map(({id, name, version, role}) => ({id, name, version, role})), checkpoint}));
 }
 
@@ -70,5 +79,6 @@ export async function loadRoute(home, taskId, scope = 'personal') {
     if (!['active', 'historical'].includes(p.status)) throw new Error('原方法版本不可用，请重新选用。');
     profiles.push(p);
   }
-  return {status: plan.checkpoint?.needsReview ? 'needs-review' : 'ready', plan, profiles};
+  plan.excludedIds ||= [];
+  return {status: plan.checkpoint?.needsReview || profiles.some(p => p.sourceStatus === 'needs-review') ? 'needs-review' : 'ready', plan, profiles};
 }

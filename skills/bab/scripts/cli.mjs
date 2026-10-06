@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {dataHome, readState, mutateState} from './store.mjs';
+import {dataHome, clearDerivedData, mutateState} from './store.mjs';
 import {doctor} from './environment.mjs';
 import {grantHistory, revokeHistory, readHistory} from './history.mjs';
 import {addRule, listRules, queryRules, supersedeRule, forgetRule} from './memory.mjs';
@@ -12,6 +12,7 @@ import {createProfile, listProfiles, saveProfileVersion, getProfile, resolveProf
 import {routingCatalog, saveRoute, loadRoute, listRoutes, checkpointRoute} from './routing.mjs';
 import {readConfig, saveConfig} from './config.mjs';
 import {setup} from './setup.mjs';
+import {importMaterial, listMaterials, getMaterial, deleteMaterial, cleanupMaterials} from './materials.mjs';
 
 export async function main(argv = process.argv.slice(2)) {
   const [command = 'help', ...args] = argv; const home = dataHome();
@@ -26,6 +27,11 @@ export async function main(argv = process.argv.slice(2)) {
     },
     'config-get': () => readConfig(home),
     'config-set': async () => saveConfig(home, await json(args[0])),
+    'material-import': async () => importMaterial(home, await json(args[0])),
+    'material-list': () => listMaterials(home, {scope: args[0] || 'personal', query: args[1] || '', kind: args[2]}),
+    'material-get': () => getMaterial(home, args[0], args[1] || 'personal', args[2] === undefined ? undefined : Number(args[2])),
+    'material-delete': async () => deleteMaterial(home, args[0], await json(args[1])),
+    'material-cleanup': () => cleanupMaterials(home),
     'profile-create': async () => createProfile(home, await json(args[0])),
     'profile-list': () => listProfiles(home, args[0] || 'personal'),
     'profile-save': async () => saveProfileVersion(home, args[0], await json(args[1])),
@@ -64,9 +70,7 @@ export async function main(argv = process.argv.slice(2)) {
     'update-apply': async () => applyUpdate(home, await json(args[0])),
     'data-clear': async () => {
       if (args[0] !== '--confirmed') throw new Error('清除全部派生记忆与授权需要用户确认；传入 --confirmed。');
-      const before = await readState(home);
-      for (const p of before.profiles || []) await deleteProfile(home, p.id);
-      return mutateState(home, s => {s.rules = []; s.grants = []; s.feedback = []; s.tasks = {}; s.resources = {}; s.settings = {resources: false}; return {cleared: true, preserved: '安装回执和宿主原始记录；服务端已发送反馈不在本地清除范围'};});
+      return clearDerivedData(home);
     },
     help: () => ({name: '借个脑子', version, commands: Object.keys(commands),
       usage: '大部分变更命令接收 JSON 文件。参见 references/operations.md。不要把私人参数文件放入 Git。', dataHome: home})
