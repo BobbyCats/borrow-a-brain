@@ -18,4 +18,3 @@ export function materialReceipt(value) {
   }
   return {material};
 }
-
