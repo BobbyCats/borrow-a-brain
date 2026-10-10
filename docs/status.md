@@ -1,6 +1,6 @@
 # 开发状态
 
-当前代码为 **0.1.6 本地候选版**，尚未对外发布。上一公开版本为 0.1.5。官网可下载版本以 [发行清单](https://jclab.top/downloads/borrow-a-brain/releases.json) 为准。
+当前代码为 **0.1.6 体验版**，正在执行发行验证。官网可下载版本以 [发行清单](https://jclab.work/downloads/borrow-a-brain/releases.json) 为准。
 
 ## 当前优化范围
 
