@@ -8,9 +8,9 @@
 - 通用源码安装包或安装后的源码：`node /绝对路径/skills/bab/scripts/run.mjs <命令> ...`
 - 独立包：`/绝对路径/skills/bab/bin/bab <命令> ...`；Windows 文件名 `bab.exe`。只有包中实际存在程序且平台已验证时使用。
 
-`doctor` 查看环境，只探测已知宿主目录是否存在。`help` 列出命令。脚本输出 JSON；退出码非零代表失败，不能当作已完成。
+`doctor` 查看环境，只探测已知宿主目录是否存在。`help` 列出命令，`help 命令名` 查看该命令参数。脚本输出 JSON；退出码非零代表失败，不能当作已完成或空目录。未知选项、额外参数和非法范围会报错。
 
-`context 项目路径` 返回规范化的真实路径及任务 scope。后续 route 命令沿用返回值，避免同一个目录因链接写法不同查不到任务。`cli.mjs` 是模块，不是可执行入口。
+`context 项目路径` 返回规范化的真实路径及任务 scope。后续命令沿用返回值，避免同一个目录因链接写法不同查不到任务。范围是位置参数，例如 `route-catalog 'project:/实际项目路径'`，不使用 `--scope`。无项目时用 personal。`cli.mjs` 是模块，不是可执行入口。
 
 数据位置由 `BAB_HOME` 覆盖；默认 macOS 是用户 Library/Application Support/borrow-a-brain，Windows 是 LOCALAPPDATA/borrow-a-brain，Linux 是 XDG_DATA_HOME/borrow-a-brain 或 ~/.local/share/borrow-a-brain。
 
@@ -82,6 +82,8 @@ sources 可附带 [多媒体证据字段](people.md#多媒体证据字段)，保
 | profile-delete | 档案 ID；清除本套件内所有版本和对应路由记录 |
 
 版本 JSON 字段：`change`、`boundaries`、`sources[{id,role,ref,date,excerpt}]`、`methods[{name,trigger,action,reason,limits,evidence,sourceIds}]`、`capabilities[{task,when,avoid}]`、`evaluations[{kind,input,output,result,reviewer}]`。包内 [版本参数示例](../assets/examples/profile-version.json) 是虚构草稿，测试状态为 unrun；不得直接改成 pass 充当实测。
+
+profile-save 与 profile-get 返回 `readiness`，包含 readyToActivate、blockers、missingTrials、nextAction。具体下一步见 [建档到使用](people.md#建档到使用)。旧版本内容及生成的 SKILL.md 保持不变；readiness 由现有记录即时计算，不迁移用户数据。
 
 `evidence` 为 observed 或 inferred；`role` 区分 user、subject、assistant、document、observer；验证 kind 为 known、new、boundary，result 为 pass、fail、unrun。来源缺失和测试失败不能启用。多媒体来源可附 material 回执，见 [证据字段](people.md#多媒体证据字段)。导出可分享引用和试用摘要见 [导出来源与试用](people.md#导出来源与试用)。
 

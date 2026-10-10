@@ -13,9 +13,11 @@ import {routingCatalog, saveRoute, loadRoute, listRoutes, checkpointRoute} from 
 import {readConfig, saveConfig} from './config.mjs';
 import {setup} from './setup.mjs';
 import {importMaterial, listMaterials, getMaterial, deleteMaterial, cleanupMaterials} from './materials.mjs';
+import {parseArguments, usageFor} from './arguments.mjs';
 
 export async function main(argv = process.argv.slice(2)) {
-  const [command = 'help', ...args] = argv; const home = dataHome();
+  const [command = 'help', ...rawArgs] = argv;
+  const args = parseArguments(command, rawArgs); const home = dataHome();
   const version = JSON.parse(await fs.readFile(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'version.json'), 'utf8')).version;
   const json = async file => {if (!file) throw new Error('请提供 JSON 参数文件。'); return JSON.parse(await fs.readFile(file, 'utf8'));};
   const commands = {
@@ -72,7 +74,7 @@ export async function main(argv = process.argv.slice(2)) {
       if (args[0] !== '--confirmed') throw new Error('清除全部派生记忆与授权需要用户确认；传入 --confirmed。');
       return clearDerivedData(home);
     },
-    help: () => ({name: '借个脑子', version, commands: Object.keys(commands),
+    help: () => args[0] ? {command: args[0], usage: usageFor(args[0]), scope: 'personal 或 context 返回的 project: 范围；范围是位置参数'} : ({name: '借个脑子', version, commands: Object.keys(commands),
       usage: '大部分变更命令接收 JSON 文件。参见 references/operations.md。不要把私人参数文件放入 Git。', dataHome: home})
   };
   if (!commands[command]) throw new Error(`未知命令：${command}`);

@@ -5,7 +5,7 @@ description: "带我上手：用户不会使用借个脑子、不记得命令、
 
 # 带我上手 · Show Me How
 
-读取 [使用帮助](../bab/references/roles/help.md)。展示“本次使用：带我上手”。
+读取 [使用帮助](../bab/references/roles/help.md)，按 [调用声明](../bab/references/disclosure.md) 展示实际入口与方法状态。
 
 用户问怎么提供视频、音频、PDF、书籍或照片时，按 [素材指南](../bab/assets/materials-guide.md) 教他最少要给什么。用户已提供素材时先试读，别把格式处理交还给用户。
 

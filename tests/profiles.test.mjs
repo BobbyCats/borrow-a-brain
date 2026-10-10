@@ -24,15 +24,33 @@ async function active(home, name = '合成老王', scope = 'personal') {
 test('档案草稿不能自动调用；方法来源、验证与启用受约束', async t => {
   const home = await sandbox(t); const p = await createProfile(home, person());
   const draft = await saveProfileVersion(home, p.id, {...version(), evaluations: []});
+  assert.equal(draft.readiness.nextAction, 'run-trials');
+  assert.deepEqual(draft.readiness.missingTrials, ['new', 'boundary']);
   assert.equal((await resolveProfile(home, '王老师')).status, 'not-ready');
   await assert.rejects(activateProfile(home, p.id, draft.version, draft.approvalHash), /验证/u);
   const good = await saveProfileVersion(home, p.id, version());
+  assert.equal(good.readiness.nextAction, 'confirm-activation');
+  assert.deepEqual(await routingCatalog(home), []);
   await assert.rejects(activateProfile(home, p.id, good.version, 'wrong'), /确认/u);
   await activateProfile(home, p.id, good.version, good.approvalHash);
   const loaded = await resolveProfile(home, '王老师'); assert.equal(loaded.status, 'resolved');
+  assert.equal(loaded.profile.readiness.nextAction, 'use');
   assert.ok(loaded.profile.skill.includes('先说影响'));
   const bad = version(); bad.methods[0].sourceIds = ['missing'];
   await assert.rejects(saveProfileVersion(home, p.id, bad), /不存在/u);
+});
+test('失败试用的可读回执与启用门槛一致；不改已存版本字节', async t => {
+  const home = await sandbox(t), p = await createProfile(home, person());
+  const input = version(); input.evaluations[0].result = 'fail';
+  const draft = await saveProfileVersion(home, p.id, input);
+  assert.equal(draft.readiness.readyToActivate, false);
+  assert.equal(draft.readiness.nextAction, 'revise-and-retest');
+  const before = await fs.readFile(path.join(draft.path, 'SKILL.md'), 'utf8');
+  const reread = await getProfile(home, p.id, {version: draft.version});
+  assert.deepEqual(reread.readiness, draft.readiness);
+  await assert.rejects(activateProfile(home, p.id, draft.version, draft.approvalHash), /失败/u);
+  assert.equal(await fs.readFile(path.join(draft.path, 'SKILL.md'), 'utf8'), before);
+  assert.deepEqual(await routingCatalog(home), []);
 });
 test('同名人物返回歧义，不擅自挑选；项目档案不跨范围加载', async t => {
   const home = await sandbox(t); await active(home); await active(home, '合成小王');

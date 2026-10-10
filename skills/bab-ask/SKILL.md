@@ -5,7 +5,7 @@ description: "问到点上：用户想理清选择、检验想法、找出方案
 
 # 问到点上 · Ask Me Why
 
-读取 [提问流程](../bab/references/roles/ask.md)。展示“本次使用：问到点上”。
+读取 [提问流程](../bab/references/roles/ask.md)，按 [调用声明](../bab/references/disclosure.md) 展示实际入口与方法状态。
 
 先解决用户已指出的具体卡点。能查清的事实自己查。方案推荐必须有已知依据；询问用户偏好或时间上限时不替他推荐答案。允许自由回答。
 

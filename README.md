@@ -109,4 +109,4 @@ Apple 芯片 Mac、Windows x64、Linux x64 可用自带程序的安装包。通�
 <!-- maintainer-docs -->
 ## 开发与验证
 
-[架构](docs/architecture.md) · [贡献指南](CONTRIBUTING.md) · [参考项目](docs/references.md) · [0.1.5 验证范围](docs/verification-0.1.5.md)
+[架构](docs/architecture.md) · [贡献指南](CONTRIBUTING.md) · [参考项目](docs/references.md) · [验证范围](docs/verification-0.1.6.md)
