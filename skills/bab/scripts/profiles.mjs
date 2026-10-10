@@ -11,13 +11,17 @@ const accessible = (p, scope) => p.scope === 'personal' || p.scope === scope;
 const summaries = (p, state = {}) => ({sourceStatus: sourceChanges(p.sourceMaterials || [], state).length ? 'needs-review' : p.sourceMaterials?.length ? 'current' : 'untracked',id: p.id, name: p.name, aliases: p.aliases, kind: p.kind, scope: p.scope, purpose: p.purpose, capabilities: p.capabilities || [], activeVersion: p.activeVersion, versions: p.versions.map(v => v.version)});
 
 
-export async function createProfile(home, input) {
-  if (!input.userApproved) throw new Error('建立持久人物档案前需用户同意。');
+function profileFields(input) {
   if (!['person', 'self', 'method'].includes(input.kind)) throw new Error('档案类型为 person / self / method。');
-  const record = {id: randomUUID(), name: boundedString(input.name, '档案名称', 100),
+  return {name: boundedString(input.name, '档案名称', 100),
     aliases: [...new Set((input.aliases || []).map(s => boundedString(s, '别名', 100)))].slice(0, 10),
     purpose: boundedString(input.purpose, '用途', 1000), kind: input.kind,
-    scope: boundedString(input.scope || 'personal', '范围', 500), activeVersion: null, versions: [], createdAt: new Date().toISOString()};
+    scope: boundedString(input.scope || 'personal', '范围', 500)};
+}
+
+export async function createProfile(home, input) {
+  if (!input.userApproved) throw new Error('建立持久人物档案前需用户同意。');
+  const record = {id: randomUUID(), ...profileFields(input), activeVersion: null, versions: [], createdAt: new Date().toISOString()};
   return mutateState(home, s => {s.profiles ||= []; s.profiles.push(record); return summaries(record);});
 }
 
@@ -43,6 +47,7 @@ function validateVersion(input) {
       action: boundedString(m.action, '怎么做', 4000), reason: boundedString(m.reason, '为什么', 2000),
       limits: boundedString(m.limits, '何时不适用', 2000), evidence: m.evidence, sourceIds: [...new Set(m.sourceIds)]};
   });
+  for (const method of methods) if (method.evidence === 'observed' && !sources.some(source => method.sourceIds.includes(source.id) && source.role !== 'assistant')) throw new Error('AI 建议不能单独作为已观察到的人物方法证据。');
   const evaluations = (input.evaluations || []).map(e => {
     if (!['known', 'new', 'boundary'].includes(e.kind) || !['pass', 'fail', 'unrun'].includes(e.result)) throw new Error('验证记录格式无效。');
     return {kind: e.kind, input: boundedString(e.input, '测试问题', 2000), output: boundedString(e.output, '实际输出或未执行说明', 4000), result: e.result, reviewer: boundedString(e.reviewer, '评审人或模型', 200)};
@@ -70,25 +75,117 @@ function readiness(record, sourceStatus = 'current', active = false) {
     nextAction: sourceStatus === 'needs-review' ? 'review-sources' : failed ? 'revise-and-retest' : missing.length ? 'run-trials' : active ? 'use' : 'confirm-activation'};
 }
 
+async function writeVersion(home, state, p, valid, onDirectory) {
+  checkSourceLinks(valid.sources, state, p.scope);
+  const version = `v${String(p.versions.length + 1).padStart(4, '0')}`;
+  const record = {...valid, version, profileId: p.id, createdAt: new Date().toISOString()};
+  const approvalHash = digest(record);
+  const dir = path.join(home, 'people', p.id, 'versions', version);
+  await fs.mkdir(path.dirname(dir), {recursive: true, mode: 0o700});
+  await fs.mkdir(dir, {mode: 0o700}); onDirectory({dir, id: p.id, version});
+  await atomicJSON(path.join(dir, 'record.json'), record);
+  await fs.writeFile(path.join(dir, 'SKILL.md'), skillText(p, record), {mode: 0o600});
+  p.versions.push({version, approvalHash, sourceMaterials: valid.sources.filter(x => x.material?.library).map(x => ({material: {library: x.material.library}})), createdAt: record.createdAt});
+  return {id: p.id, version, approvalHash, path: dir, status: 'draft', change: record.change, readiness: readiness(record)};
+}
+
+async function discardUncommittedVersion(home, created, error) {
+  if (!created) return;
+  // mutateState may throw after the index commit, for example during lock cleanup.
+  // Never remove a registered version, or guess the outcome if the index is unreadable.
+  let state;
+  try {state = await readState(home);} catch {
+    error.message += '；无法核查提交状态，保留版本文件，请回读档案后再处理。';
+    return;
+  }
+  if (state.profiles?.find(p => p.id === created.id)?.versions.some(v => v.version === created.version)) {
+    error.message += `；${created.id}/${created.version} 已登记，版本文件已保留；请回读档案并处理清理错误。`;
+    return;
+  }
+  await fs.rm(created.dir, {recursive: true, force: true});
+}
+
 export async function saveProfileVersion(home, id, input) {
   const valid = validateVersion(input); let createdDir;
   try {
     return await mutateState(home, async s => {
       const p = s.profiles?.find(p => p.id === id); if (!p) throw new Error('找不到档案。');
-      checkSourceLinks(valid.sources, s, p.scope);
-      for (const method of valid.methods) if (method.evidence === 'observed' && !valid.sources.some(source => method.sourceIds.includes(source.id) && source.role !== 'assistant')) throw new Error('AI 建议不能单独作为已观察到的人物方法证据。');
-      const version = `v${String(p.versions.length + 1).padStart(4, '0')}`;
-      const record = {...valid, version, profileId: id, createdAt: new Date().toISOString()};
-      const approvalHash = digest(record);
-      const dir = path.join(home, 'people', id, 'versions', version);
-      await fs.mkdir(path.dirname(dir), {recursive: true, mode: 0o700});
-      await fs.mkdir(dir, {mode: 0o700}); createdDir = dir;
-      await atomicJSON(path.join(dir, 'record.json'), record);
-      await fs.writeFile(path.join(dir, 'SKILL.md'), skillText(p, record), {mode: 0o600});
-      p.versions.push({version, approvalHash, sourceMaterials: valid.sources.filter(x => x.material?.library).map(x => ({material: {library: x.material.library}})), createdAt: record.createdAt});
-      return {id, version, approvalHash, path: dir, status: 'draft', change: record.change, readiness: readiness(record)};
+      return writeVersion(home, s, p, valid, dir => {createdDir = dir;});
     });
-  } catch (e) {if (createdDir) await fs.rm(createdDir, {recursive: true, force: true}); throw e;}
+  } catch (e) {await discardUncommittedVersion(home, createdDir, e); throw e;}
+}
+
+// A proposal is computed without persisting its text. Only a matching user decision
+// creates a draft, using the same version writer and activation gate as other flows.
+function intakePreview(state, input) {
+  const requestId = boundedString(input.requestId, '本次提议编号', 100);
+  if (typeof input.scope === 'string' && /[\r\n\0]/u.test(input.scope)) throw new Error('范围不能包含控制字符。');
+  const scope = boundedString(input.scope, '显式使用范围', 500);
+  if (/[\r\n\0]/u.test(scope) || !/^(?:personal|project:.+)$/u.test(scope)) throw new Error('范围必须是 personal 或 context 返回的 project: 范围。');
+  const reason = boundedString(input.reason, '推荐收录的具体理由', 2000);
+  const valid = validateVersion(input.version);
+  let p, target = null, profile;
+  if (input.target) {
+    if (input.profile) throw new Error('修订已有方法时不能同时新建档案。');
+    target = {id: boundedString(input.target.id, '目标编号', 100),
+      version: boundedString(input.target.version, '基准版本', 100),
+      approvalHash: boundedString(input.target.approvalHash, '基准摘要', 100)};
+    p = state.profiles?.find(row => row.id === target.id && row.scope === scope);
+    if (!p) throw new Error('确认范围内找不到修订目标。');
+    profile = profileFields(p);
+  } else {
+    if (!input.profile || input.profile.kind !== 'method') throw new Error('主动收录需提供 kind=method 的具体方法。');
+    if (input.profile.scope && input.profile.scope !== scope) throw new Error('档案与提议范围不一致。');
+    profile = profileFields({...input.profile, scope});
+  }
+  const content = {requestId, scope, reason, profile, target, version: valid};
+  const approvalHash = digest(content);
+  const prior = (state.profiles || []).flatMap(row => row.versions.map(v => ({p: row, v})))
+    .find(({v}) => v.intake?.requestId === requestId);
+  if (prior) {
+    if (prior.v.intake.approvalHash !== approvalHash) throw new Error('同一提议编号已用于不同内容；请重新展示并使用新编号。');
+    return {status: 'already-saved', id: prior.p.id, version: prior.v.version, scope,
+      activeVersion: prior.p.activeVersion, approvalHash: prior.v.approvalHash};
+  }
+  if (target) {
+    const latest = p.versions.at(-1);
+    if (latest?.version !== target.version || latest?.approvalHash !== target.approvalHash) throw new Error('修订目标已有新版本；重新回读、展示差异并确认。');
+  }
+  checkSourceLinks(valid.sources, state, scope);
+  return {status: 'preview', operation: target ? 'revise' : 'create', content, approvalHash,
+    readiness: readiness(valid), next: '展示具体内容和范围；用户确认保存后，以此摘要提交。保存只建立草稿，不自动启用。'};
+}
+
+export async function intakeProfile(home, input) {
+  const preview = intakePreview(await readState(home), input);
+  if (preview.status === 'already-saved') await getProfile(home, preview.id, {version: preview.version, scope: preview.scope});
+  if (input.approvalHash === undefined) return preview;
+  if (input.userApproved !== true) throw new Error('只有用户明确确认这份提议后才能保存。');
+  if (preview.status === 'already-saved') {
+    const state = await readState(home);
+    const prior = state.profiles?.find(p => p.id === preview.id)?.versions.find(v => v.version === preview.version);
+    if (prior?.intake?.approvalHash !== input.approvalHash) throw new Error('确认摘要不匹配。');
+    return preview;
+  }
+  if (input.approvalHash !== preview.approvalHash) throw new Error('内容、范围或目标已变化；重新展示提议并确认。');
+  let createdDir;
+  try {
+    return await mutateState(home, async s => {
+      const current = intakePreview(s, input);
+      if (current.status === 'already-saved') {
+        await getProfile(home, current.id, {version: current.version, scope: current.scope});
+        return current;
+      }
+      if (input.approvalHash !== current.approvalHash) throw new Error('确认后提议已变化，未保存。');
+      const {profile, target, version, requestId, reason} = current.content;
+      const p = target ? s.profiles.find(row => row.id === target.id) :
+        {id: randomUUID(), ...profile, activeVersion: null, versions: [], createdAt: new Date().toISOString()};
+      const saved = await writeVersion(home, s, p, version, dir => {createdDir = dir;});
+      p.versions.at(-1).intake = {requestId, approvalHash: current.approvalHash, reason};
+      if (!target) {s.profiles ||= []; s.profiles.push(p);}
+      return {...saved, operation: current.operation, scope: p.scope, savedAfterConfirmation: true};
+    });
+  } catch (e) {await discardUncommittedVersion(home, createdDir, e); throw e;}
 }
 
 export async function getProfile(home, id, {version, scope = 'personal'} = {}) {

@@ -8,7 +8,7 @@ import {addRule, listRules, queryRules, supersedeRule, forgetRule} from './memor
 import {install, uninstall} from './install.mjs';
 import {draftFeedback, sendFeedback, feedbackStatus, recordCorrection, resourceGate} from './feedback.mjs';
 import {checkUpdate, applyUpdate} from './update.mjs';
-import {createProfile, listProfiles, saveProfileVersion, getProfile, resolveProfile, activateProfile, deleteProfile, exportProfile} from './profiles.mjs';
+import {createProfile, intakeProfile, listProfiles, saveProfileVersion, getProfile, resolveProfile, activateProfile, deleteProfile, exportProfile} from './profiles.mjs';
 import {routingCatalog, saveRoute, loadRoute, listRoutes, checkpointRoute} from './routing.mjs';
 import {readConfig, saveConfig} from './config.mjs';
 import {setup} from './setup.mjs';
@@ -35,6 +35,7 @@ export async function main(argv = process.argv.slice(2)) {
     'material-delete': async () => deleteMaterial(home, args[0], await json(args[1])),
     'material-cleanup': () => cleanupMaterials(home),
     'profile-create': async () => createProfile(home, await json(args[0])),
+    'profile-intake': async () => intakeProfile(home, await json(args[0])),
     'profile-list': () => listProfiles(home, args[0] || 'personal'),
     'profile-save': async () => saveProfileVersion(home, args[0], await json(args[1])),
     'profile-get': () => getProfile(home, args[0], {version: args[1] === 'active' ? undefined : args[1], scope: args[2] || 'personal'}),

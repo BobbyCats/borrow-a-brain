@@ -87,6 +87,27 @@ profile-save 与 profile-get 返回 `readiness`，包含 readyToActivate、block
 
 `evidence` 为 observed 或 inferred；`role` 区分 user、subject、assistant、document、observer；验证 kind 为 known、new、boundary，result 为 pass、fail、unrun。来源缺失和测试失败不能启用。多媒体来源可附 material 回执，见 [证据字段](people.md#多媒体证据字段)。导出可分享引用和试用摘要见 [导出来源与试用](people.md#导出来源与试用)。
 
+## 主动收录
+
+`profile-intake 参数文件` 将只读提议与确认保存放在同一个入口。语义发现与查重由 [发现流程](discovery.md) 负责，脚本不靠词频猜用户想法。
+
+参数：
+
+- `requestId`：该项提议的稳定编号，重试沿用；内容发生实质变化后用新编号。
+- `scope`：显式提供 personal 或 context 返回的 project: 范围；没有默认全局范围。
+- `reason`：向用户展示的具体推荐理由。
+- `profile`：新建时的 name、aliases、kind=method、purpose。范围只取上层 scope。
+- `version`：上一节的完整版本对象。未试用的 evaluations 留空或标 unrun，不能为了保存填 pass。
+- `target`：修订已有档案时，替代 profile；包括 id、version、approvalHash，后两项来自最新草稿或最新版本的回读。目标必须属于此次确认的确切范围。
+
+不传 `approvalHash` 时只返回 preview、content、readiness 和 approvalHash，不创建数据目录或档案。content 中的用途、方法动作、来源、边界、范围、目标和推荐理由都属于本次确认内容；面向用户的卡片不得隐去会改变意思的部分。
+
+用户确认保存后，原参数增加 `userApproved:true` 和该预览的 `approvalHash`，再执行同一命令。摘要匹配才能写入；修改动作、范围、理由或目标后旧摘要失效。元数据中保存提议编号和确认摘要，重复或并发提交返回同一版本。相同编号配不同内容报错。新建和第一版保存共用同一写锁；修订时若目标出现新版本则停止，先回读并展示新差异。
+
+返回 draft 后按原试用与启用流程继续。该命令不会修改 activeVersion。“确认保存”不等于“试用通过”，也不等于“确认启用”。没有匹配授权时，不能由 Agent 自行填写 userApproved。摘要防止错配，不能证明真人授权，宿主仍负责核对用户原话。
+
+查重需看当前范围的 `profile-list`，不只看已启用目录。已保存后再次调用可返回 already-saved；用返回的 id、version 和 scope 回读验证，不重新建档。提议元数据随其档案删除或 data-clear 清除，没有独立的未确认候选库。
+
 ## 自动分工
 
 `route-catalog 范围` 列出已启用方法的用途与边界。模型理解任务后准备 JSON：

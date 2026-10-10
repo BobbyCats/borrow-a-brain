@@ -6,7 +6,7 @@
 
 借个脑子是一套中文 AI Skills。你说手头的事，AI 按任务选择方法，和你一起把事情做完。
 
-[官网与下载](https://jclab.top/tools/borrow-a-brain/) · [使用指南](docs/quickstart.md) · [更新记录](CHANGELOG.md)
+[官网与下载](https://jclab.work/tools/borrow-a-brain/) · [使用指南](docs/quickstart.md) · [更新记录](CHANGELOG.md)
 
 ## 先看看，你能拿到什么
 
@@ -28,7 +28,7 @@
 
 需要能读写本地文件、执行命令的 AI 应用。提供 Codex 和 Claude Code 安装入口。
 
-1. 从 [官网](https://jclab.top/tools/borrow-a-brain/#start) 下载适合电脑的安装包，解压。
+1. 从 [官网](https://jclab.work/tools/borrow-a-brain/#start) 下载适合电脑的安装包，解压。
 2. 在 AI 应用中提供解压后的文件夹，输入：
 
    > 帮我安装“借个脑子”。先告诉我会装在哪里、改哪些文件，保留我原来的配置。装好后带我试一次。
@@ -77,6 +77,8 @@ Apple 芯片 Mac、Windows x64、Linux x64 可用自带程序的安装包。通�
 ## 方法留下来，后面的事接着做
 
 安装包没有预装真人档案。你提供材料，AI 提炼、试用，你确认后启用。以后可以点名使用，也可以直接说任务，让 AI 选择已经启用且适用的方法。
+
+日常工作中出现值得复用的做法时，AI 会先完成任务，再主动给出一项收录建议。你能看到具体方法、适用范围和推荐理由；确认后才保存草稿。没有回复不会自动入库，保存草稿也不会自动启用。已有同类方法时优先修订原方法。
 
 | 你说 | 会做什么 |
 | --- | --- |

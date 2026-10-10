@@ -6,7 +6,7 @@ const add = (names, min, max, usage, scopes = [], flags = []) => {
 add('doctor config-get material-cleanup', 0, 0, '');
 add('help', 0, 1, '[命令]');
 add('context', 0, 1, '[项目路径]');
-add('config-set material-import profile-create history-grant memory-add install feedback-draft update-apply', 1, 1, '参数文件');
+add('config-set material-import profile-create profile-intake history-grant memory-add install feedback-draft update-apply', 1, 1, '参数文件');
 add('material-list', 0, 3, '[范围] [关键词] [类型]', [0]);
 add('material-get', 1, 3, '素材编号 [范围] [版本]', [1]);
 add('material-delete profile-save profile-export route-checkpoint memory-replace correction', 2, 2, '编号 参数文件');
