@@ -7,7 +7,7 @@ import {generateKeyPairSync, sign, createHash} from 'node:crypto';
 import {readState, mutateState, atomicJSON} from '../skills/bab/scripts/store.mjs';
 import {addRule, queryRules, supersedeRule, forgetRule} from '../skills/bab/scripts/memory.mjs';
 import {grantHistory, readHistory, revokeHistory, parseSession} from '../skills/bab/scripts/history.mjs';
-import {install, uninstall} from '../skills/bab/scripts/install.mjs';
+import {install, uninstall, fileMap, replaceSkillKeepingLauncher} from '../skills/bab/scripts/install.mjs';
 import {draftFeedback, sendFeedback, recordCorrection, resourceGate} from '../skills/bab/scripts/feedback.mjs';
 import {checkUpdate, applyUpdate, verifyBundle} from '../skills/bab/scripts/update.mjs';
 
@@ -165,6 +165,55 @@ test('同名外来 Skill 不接管', async t => {
   await fs.writeFile(path.join(config.skillsDir, 'bab', 'SKILL.md'), 'not ours');
   await assert.rejects(install(home, {...config, apply: true}), /同名/u);
   assert.equal(await fs.readFile(path.join(config.skillsDir, 'bab', 'SKILL.md'), 'utf8'), 'not ours');
+});
+
+test('保留运行程序的源码替换支持删除、新增与完整回滚', async t => {
+  const home = await sandbox(t), dest = path.join(home, 'bab'), stage = path.join(home, 'stage');
+  for (const dir of [dest, stage]) {
+    await fs.mkdir(path.join(dir, 'bin'), {recursive: true});
+    await fs.writeFile(path.join(dir, 'bin/bab.exe'), 'same launcher');
+    await fs.mkdir(path.join(dir, 'scripts'));
+  }
+  await fs.writeFile(path.join(dest, 'scripts/old.mjs'), 'old source');
+  await fs.writeFile(path.join(dest, 'removed.md'), 'old entry');
+  await fs.writeFile(path.join(stage, 'scripts/new.mjs'), 'new source');
+  await fs.writeFile(path.join(stage, 'added.md'), 'new entry');
+  const before = await fileMap(dest), expected = await fileMap(stage);
+  const inode = (await fs.stat(path.join(dest, 'bin/bab.exe'))).ino;
+  const undo = [], cleanup = [];
+  await replaceSkillKeepingLauncher(dest, stage, undo, cleanup);
+  assert.deepEqual(await fileMap(dest), expected);
+  assert.equal((await fs.stat(path.join(dest, 'bin/bab.exe'))).ino, inode);
+  for (const action of undo.reverse()) await action();
+  assert.deepEqual(await fileMap(dest), before);
+  assert.equal((await fs.stat(path.join(dest, 'bin/bab.exe'))).ino, inode);
+});
+
+test('保留运行程序的源码替换拒绝覆盖不同 EXE 且不改文件', async t => {
+  const home = await sandbox(t), dest = path.join(home, 'bab'), stage = path.join(home, 'stage');
+  for (const dir of [dest, stage]) {await fs.mkdir(path.join(dir, 'bin'), {recursive: true}); await fs.writeFile(path.join(dir, 'bin/bab.exe'), dir);}
+  const before = await fileMap(dest), undo = [], cleanup = [];
+  await assert.rejects(replaceSkillKeepingLauncher(dest, stage, undo, cleanup), /新下载包/u);
+  assert.deepEqual(await fileMap(dest), before);
+  assert.equal(undo.length, 0); assert.equal(cleanup.length, 0);
+});
+
+test('源码替换中途失败可回滚已移动条目', async t => {
+  const home = await sandbox(t), dest = path.join(home, 'bab'), stage = path.join(home, 'stage');
+  for (const dir of [dest, stage]) {
+    await fs.mkdir(path.join(dir, 'bin'), {recursive: true});
+    await fs.writeFile(path.join(dir, 'bin/bab.exe'), 'same launcher');
+    for (const name of ['a.md', 'b.md']) await fs.writeFile(path.join(dir, name), `${dir}/${name}`);
+  }
+  const before = await fileMap(dest), undo = [], cleanup = [], rename = fs.rename;
+  const mocked = t.mock.method(fs, 'rename', async (from, to) => {
+    if (from === path.join(stage, 'b.md')) throw new Error('synthetic swap failure');
+    return rename(from, to);
+  });
+  await assert.rejects(replaceSkillKeepingLauncher(dest, stage, undo, cleanup), /synthetic swap failure/u);
+  mocked.mock.restore();
+  for (const action of undo.reverse()) await action();
+  assert.deepEqual(await fileMap(dest), before);
 });
 test('反馈先本地草稿；改变收件地址或正文后旧确认失效', async t => {
   const home = await sandbox(t); const draft = await draftFeedback(home, report);

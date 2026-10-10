@@ -22,6 +22,25 @@ export async function fileMap(dir) {
 async function exists(file) {try {await fs.lstat(file); return true;} catch (e) {if (e.code === 'ENOENT') return false; throw e;}}
 async function textOrEmpty(file) {try {return await fs.readFile(file, 'utf8');} catch (e) {if (e.code === 'ENOENT') return ''; throw e;}}
 
+// Windows locks a running EXE and its parent directories. Swap only the source
+// entries; keep the unchanged launcher at its original path, including rollback.
+export async function replaceSkillKeepingLauncher(dest, stage, undo, cleanup) {
+  if (JSON.stringify(await fileMap(path.join(dest, 'bin'))) !== JSON.stringify(await fileMap(path.join(stage, 'bin')))) throw new Error('Windows 无法替换正在运行的独立程序。请从新下载包运行安装，沿用原安装目录和数据目录。');
+  const backup = path.join(path.dirname(dest), `.bab-backup-${randomUUID()}`);
+  await fs.mkdir(backup); cleanup.push(backup);
+  for (const name of (await fs.readdir(dest)).filter(name => name !== 'bin')) {
+    await fs.rename(path.join(dest, name), path.join(backup, name));
+    undo.push(async () => {
+      await fs.rm(path.join(dest, name), {recursive: true, force: true});
+      await fs.rename(path.join(backup, name), path.join(dest, name));
+    });
+  }
+  for (const name of (await fs.readdir(stage)).filter(name => name !== 'bin')) {
+    await fs.rename(path.join(stage, name), path.join(dest, name));
+    undo.push(() => fs.rm(path.join(dest, name), {recursive: true, force: true}));
+  }
+}
+
 // Resolve existing ancestors even when the final installation directory does not exist yet.
 async function destinationPath(file) {
   let current = path.resolve(file); const missing = [];
@@ -119,6 +138,10 @@ export async function install(home, {source, skillsDir, rulesFile, scopeRoot, ap
           }
         }
         maps[id] = await fileMap(stage);
+        if (previous && id === 'bab' && process.platform === 'win32' && process.versions.bun && isWithin(dest, process.execPath)) {
+          await replaceSkillKeepingLauncher(dest, stage, undo, cleanup);
+          continue;
+        }
         if (await exists(dest)) {
           const backup = path.join(skillsDir, `.bab-backup-${randomUUID()}`);
           await fs.rename(dest, backup); cleanup.push(backup);
