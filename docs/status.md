@@ -1,8 +1,8 @@
 # 开发状态
 
-当前发行版本为 **0.1.7 体验版**。[GitHub Release](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.7) 与[官网发行清单](https://jclab.work/downloads/borrow-a-brain/releases.json)已同步。
+当前发行版本为 **0.1.8 体验版**。[GitHub Release](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.8) 与[官网发行清单](https://jclab.work/downloads/borrow-a-brain/releases.json)已同步。
 
-0.1.8 发行候选正在验收。重点是合并任务范围与方法查询，以及收录预览、展示顺序和参数帮助。最新结果见 [0.1.8 验证记录](verification-0.1.8.md)。
+0.1.8 合并任务范围与方法查询，调整收录预览、正文与卡片顺序，并补全参数帮助。本机 84 项程序测试、三平台六项 CI、四种正式包及八种旧版安装配置升级通过。参考模型最终 4 场、12 轮达到本轮目标；Luna 仍有路径枚举和输出质量限制，见 [0.1.8 验证记录](verification-0.1.8.md)。
 
 此前单纯前移范围说明的对照未达到采用门槛，未合并；结果保留在 [范围位置对照](verification-scope-placement.md)。此前本地修复见 [预览与任务切换](verification-preview-task-refresh.md)、[顺序与参数帮助](verification-card-order-help.md)和[自然纠正](verification-discovery-correction.md)。
 
@@ -52,13 +52,13 @@
 - 0.1.3 修正进度被重复分工覆盖、多安装检查互相抑制、链接目录越界、安装版本参数漂移和带查询参数的反馈回执地址。分工变化后的旧进度保留并标记待复核。
 - 0.1.3 本机 45 项测试、独立复测 12 场景和六项 CI 通过。四种签名分发候选已组装，实际 0.1.1 → 0.1.3 升级保留记忆与原规则。相关修复已包含在官网分发的 0.1.4 中。
 
-- 0.1.1、0.1.4、0.1.5、0.1.6 固定版本下载继续保留。当前四种安装包、版本清单与签名更新源一致；正式域名下载哈希、包内版本及旧公钥验签通过。
+- 0.1.1、0.1.4、0.1.5、0.1.6、0.1.7 固定版本下载继续保留。当前四种安装包、版本清单与签名更新源一致；正式域名下载哈希、包内版本及旧公钥验签通过。
 
 ## 验证口径
 
 测试只使用合成材料。已通过正式域名发送一条明确标记的合成反馈，完成处理、回执查询和测试数据移出收件箱。没有读取或发送用户真实旧对话。
 
-最新发行验证见 [0.1.7 验证回执](verification-0.1.7.md)。[0.1.6](verification-0.1.6.md)、[0.1.5](verification-0.1.5.md)及[历史回执](verification.md)中的 CI 只对应各自版本。
+最新发行验证见 [0.1.8 验证记录](verification-0.1.8.md)。[0.1.7](verification-0.1.7.md)、[0.1.6](verification-0.1.6.md)、[0.1.5](verification-0.1.5.md)及[历史回执](verification.md)中的 CI 只对应各自版本。
 
 ## 尚未完成的外部验收与发布工作
 
