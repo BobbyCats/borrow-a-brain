@@ -1,0 +1,32 @@
+{
+  "id": "natural-correction-discovery",
+  "origin": "0.1.7 Codex synthetic conversation; independently missed twice",
+  "precondition": "empty isolated library; fresh context; normal installed routing; no save instruction",
+  "turns": [
+    "虚构练习。把这段讨论整理成会后待办：阿禾提议周五换新版海报，小陆担心图片没授权；大家同意先沿用旧海报，小陆周三前查清授权；阿禾说等授权拿到可以做新版。简短一点，适合发在工作群。",
+    "第三条还是混在待办里了。请先按“已决定、已承诺、待决定”分开：先用旧海报是已决定；小陆查授权才是有人和期限的待办；阿禾说可以做，只是意向，授权没落实前不能给他挂任务，也不能把提议里的周五当成已承诺日期。请按这个重写。"
+  ],
+  "observed_failures": [
+    {
+      "run": "D",
+      "correction_tools": 0,
+      "observation": "Rewrote the result; did not enter discovery or propose a candidate."
+    },
+    {
+      "run": "D2",
+      "observation": "Read discovery.md; then ended with the rewrite, without duplicate lookup or a candidate."
+    }
+  ],
+  "expected": [
+    "Correct the deliverable first, preserving intention and authorization boundaries.",
+    "Before ending the correction turn, check drafts and relevant confirmed memory in the isolated scope.",
+    "If no equivalent exists, show one source-bounded single-case candidate after a read-only intake preview.",
+    "Do not create a profile, memory, or active version before explicit confirmation."
+  ],
+  "controls": {
+    "wording_only": "把“周三前”改成“周三之前”，其他内容保留。",
+    "result_only_suffix": "这次只给可转发的正文，不要附加建议。",
+    "ambiguous_assent": "可以，再短一点。",
+    "reject": "这项方法这次不存，也别再提醒我。"
+  }
+}

@@ -10,7 +10,7 @@
 
 `doctor` 查看环境，只探测已知宿主目录是否存在。`help` 列出命令，`help 命令名` 查看该命令参数。脚本输出 JSON；退出码非零代表失败，不能当作已完成或空目录。未知选项、额外参数和非法范围会报错。
 
-`context 项目路径` 返回规范化的真实路径及任务 scope。后续命令沿用返回值，避免同一个目录因链接写法不同查不到任务。范围是位置参数，例如 `route-catalog 'project:/实际项目路径'`，不使用 `--scope`。无项目时用 personal。`cli.mjs` 是模块，不是可执行入口。
+`route-context [项目路径]` 一次返回规范化的 `scope` 与已启用方法 `catalog`，省略路径时使用当前工作目录。个人事务用 `route-context --personal`；不能同时指定项目路径。后续查询与保存沿用返回的 `scope`。已有 `context 项目路径` 和 `route-catalog 范围` 仍可分别查询路径与目录。范围是位置参数，例如 `profile-list 'project:/实际项目路径'`，不使用 `--scope`。`cli.mjs` 是模块，不是可执行入口。
 
 数据位置由 `BAB_HOME` 覆盖；默认 macOS 是用户 Library/Application Support/borrow-a-brain，Windows 是 LOCALAPPDATA/borrow-a-brain，Linux 是 XDG_DATA_HOME/borrow-a-brain 或 ~/.local/share/borrow-a-brain。
 
@@ -91,10 +91,12 @@ profile-save 与 profile-get 返回 `readiness`，包含 readyToActivate、block
 
 `profile-intake 参数文件` 将只读提议与确认保存放在同一个入口。语义发现与查重由 [发现流程](discovery.md) 负责，脚本不靠词频猜用户想法。
 
+准备参数时可运行 `help profile-intake`，直接查看引用包内版本示例的完整预览参数。`version.boundaries` 是字符串；每条来源的 `date` 必填，真实时间未知时写“未知”。按当前材料替换示例内容与范围，未试用记录不填 pass。
+
 参数：
 
 - `requestId`：该项提议的稳定编号，重试沿用；内容发生实质变化后用新编号。
-- `scope`：显式提供 personal 或 context 返回的 project: 范围；没有默认全局范围。
+- `scope`：显式提供 路由返回的 personal 或 project: 范围；没有默认全局范围。
 - `reason`：向用户展示的具体推荐理由。
 - `profile`：新建时的 name、aliases、kind=method、purpose。范围只取上层 scope。
 - `version`：上一节的完整版本对象。未试用的 evaluations 留空或标 unrun，不能为了保存填 pass。
@@ -110,7 +112,7 @@ profile-save 与 profile-get 返回 `readiness`，包含 readyToActivate、block
 
 ## 自动分工
 
-`route-catalog 范围` 列出已启用方法的用途与边界。模型理解任务后准备 JSON：
+按 [路由](routing.md#两层选择) 使用 `route-context` 获取范围和已启用目录。模型理解任务后准备 JSON；下例以 personal 举例，实际 scope 使用本次返回值：
 
 ```json
 {"taskId":"当前任务稳定编号","scope":"personal","intent":"向客户解释延期","deliverable":"一段可以直接使用的话","selected":[{"id":"实际档案ID","role":"lead","responsibility":"组织原因和补救措施","why":"该档案有对应的沟通方法"}],"excludedIds":[]}

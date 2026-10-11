@@ -3,6 +3,12 @@ import path from 'node:path';
 import os from 'node:os';
 import {dataHome} from './store.mjs';
 
+export async function projectContext(home, projectPath = process.cwd()) {
+  const project = await fs.realpath(projectPath);
+  if (!(await fs.stat(project)).isDirectory()) throw new Error('项目路径必须是目录。');
+  return {project, scope: `project:${project}`, dataHome: home};
+}
+
 export async function doctor(home = dataHome()) {
   const candidates = {
     codex: {skills: path.join(os.homedir(), '.agents', 'skills'), legacySkills: path.join(os.homedir(), '.codex', 'skills'), history: path.join(os.homedir(), '.codex', 'sessions')},

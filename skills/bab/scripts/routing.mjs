@@ -1,10 +1,17 @@
 import {randomUUID} from 'node:crypto';
 import {boundedString, mutateState, readState} from './store.mjs';
 import {getProfile, listProfiles} from './profiles.mjs';
+import {projectContext} from './environment.mjs';
 
 // The host model makes the semantic choice. This module enforces scope, versions and ownership.
 export async function routingCatalog(home, scope = 'personal') {
   return (await listProfiles(home, scope)).filter(p => p.activeVersion && p.sourceStatus !== 'needs-review').map(({versions, aliases, ...p}) => p);
+}
+
+export async function routingContext(home, {project, personal = false} = {}) {
+  if (personal && project !== undefined) throw new Error('个人范围不能同时指定项目路径。用法：route-context [项目路径] 或 route-context --personal');
+  const context = personal ? {project: null, scope: 'personal', dataHome: home} : await projectContext(home, project);
+  return {...context, catalog: await routingCatalog(home, context.scope)};
 }
 
 export async function saveRoute(home, input) {

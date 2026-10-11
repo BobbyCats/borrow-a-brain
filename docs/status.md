@@ -2,6 +2,10 @@
 
 当前发行版本为 **0.1.7 体验版**。[GitHub Release](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.7) 与[官网发行清单](https://jclab.work/downloads/borrow-a-brain/releases.json)已同步。
 
+0.1.8 发行候选正在验收。重点是合并任务范围与方法查询，以及收录预览、展示顺序和参数帮助。最新结果见 [0.1.8 验证记录](verification-0.1.8.md)。
+
+此前单纯前移范围说明的对照未达到采用门槛，未合并；结果保留在 [范围位置对照](verification-scope-placement.md)。此前本地修复见 [预览与任务切换](verification-preview-task-refresh.md)、[顺序与参数帮助](verification-card-order-help.md)和[自然纠正](verification-discovery-correction.md)。
+
 ## 0.1.7 更新内容
 
 - 普通任务中主动发现方法，先展示具体内容、推荐理由和范围，确认后保存草稿。
