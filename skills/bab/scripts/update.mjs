@@ -4,15 +4,11 @@ import os from 'node:os';
 import {verify, createHash, createPublicKey} from 'node:crypto';
 import {mutateState, readState, isWithin} from './store.mjs';
 import {install} from './install.mjs';
+import {checkFeedback} from './feedback.mjs';
+import {compareVersions, UPDATE_INTERVAL, retryDelay} from './check-policy.mjs';
+export {compareVersions} from './check-policy.mjs';
 
 const MAX = 8 * 1024 * 1024;
-export function compareVersions(a, b) {
-  const valid = /^\d+\.\d+\.\d+$/u;
-  if (!valid.test(a) || !valid.test(b)) throw new Error('版本必须是三个非负整数。');
-  const x = a.split('.').map(Number), y = b.split('.').map(Number);
-  for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i] ? 1 : -1;
-  return 0;
-}
 export function verifyBundle(envelope, publicKey) {
   if (!publicKey) throw new Error('尚未配置作者的可信公钥，不能验证更新。');
   if (createPublicKey(publicKey).asymmetricKeyType !== 'ed25519') throw new Error('更新公钥必须是 Ed25519。');
@@ -49,7 +45,7 @@ async function boundedResponse(res) {
   return Buffer.concat(parts).toString('utf8');
 }
 
-export async function checkUpdate(home, config, currentVersion, {skillsDir, force = false, now = Date.now(), fetcher = fetch} = {}) {
+async function checkVersion(home, config, currentVersion, {skillsDir, force = false, now = Date.now(), fetcher = fetch} = {}) {
   compareVersions(currentVersion, '0.0.0');
   if (!Array.isArray(config.sources) || !config.sources.length || !config.publicKey) return {status: 'unconfigured', message: '作者尚未配置可验证的更新源；当前版本仍可使用。'};
   if (config.sources.length > 3) throw new Error('更新源最多 3 个。');
@@ -58,7 +54,12 @@ export async function checkUpdate(home, config, currentVersion, {skillsDir, forc
   const key = createHash('sha256').update(JSON.stringify([skillsDir ? path.resolve(skillsDir) : null, currentVersion, config.sources, config.publicKey])).digest('hex');
   const state = await readState(home);
   const checked = state.maintenance.checks?.[key];
-  if (!force && checked?.lastCheck && now - checked.lastCheck < 7 * 86400000) return {status: 'not-due'};
+  const cached = (row, reason) => ({status: 'not-due', nextCheckAt: row?.nextCheckAt ?? row?.lastCheck + UPDATE_INTERVAL,
+    reason: reason || (row?.failureCount ? 'retry-backoff' : 'interval'),
+    verifiedVersion: !row?.failureCount && row?.lastSuccess != null && now - row.lastSuccess < UPDATE_INTERVAL ? row.verifiedVersion : undefined});
+  const unchanged = row => JSON.stringify(row ?? null) === JSON.stringify(checked ?? null);
+  const nextCheckAt = checked?.nextCheckAt ?? (checked?.lastCheck == null ? 0 : checked.lastCheck + UPDATE_INTERVAL);
+  if (!force && now < nextCheckAt) return cached(checked);
   const failures = [];
   for (const source of config.sources) {
     try {
@@ -69,21 +70,41 @@ export async function checkUpdate(home, config, currentVersion, {skillsDir, forc
       const envelope = JSON.parse(await boundedResponse(response));
       const payload = verifyBundle(envelope, config.publicKey);
       const isNew = compareVersions(payload.version, currentVersion) > 0;
-      const notify = await mutateState(home, s => {
+      const saved = await mutateState(home, s => {
         s.maintenance.checks ||= {};
+        if (!unchanged(s.maintenance.checks[key])) return {superseded: s.maintenance.checks[key]};
         const check = s.maintenance.checks[key] ||= {};
         const notify = isNew && check.notifiedVersion !== payload.version;
-        check.lastCheck = now;
+        check.lastCheck = now; check.lastSuccess = now; check.nextCheckAt = now + UPDATE_INTERVAL;
+        check.failureCount = 0; check.verifiedVersion = payload.version;
         if (notify) check.notifiedVersion = payload.version;
-        return notify;
+        return {notify};
       });
+      if (saved.superseded) return cached(saved.superseded, 'concurrent-check');
       return {status: isNew ? 'available' : 'current', version: payload.version, currentVersion,
-        notify, notes: payload.notes, source: url.href, envelope: isNew ? envelope : undefined};
+        notify: saved.notify, notes: payload.notes, source: url.href, verifiedVersion: payload.version,
+        nextCheckAt: now + UPDATE_INTERVAL, envelope: isNew ? envelope : undefined};
     } catch (e) {failures.push({source, error: e.message});}
   }
   // A failed check is not an update failure and must not interrupt the user's task.
-  await mutateState(home, s => {s.maintenance.checks ||= {}; s.maintenance.checks[key] = {...s.maintenance.checks[key], lastCheck: now};});
-  return {status: 'offline-or-invalid', failures, message: '未取得有效更新，继续使用当前版本；可手动重查。'};
+  const saved = await mutateState(home, s => {
+    s.maintenance.checks ||= {};
+    if (!unchanged(s.maintenance.checks[key])) return {superseded: s.maintenance.checks[key]};
+    const check = s.maintenance.checks[key] ||= {};
+    check.failureCount = Math.min(3, (check.failureCount || 0) + 1);
+    check.lastCheck = now; check.nextCheckAt = now + retryDelay(check.failureCount);
+    return {nextCheckAt: check.nextCheckAt};
+  });
+  if (saved.superseded) return cached(saved.superseded, 'concurrent-check');
+  return {status: 'offline-or-invalid', failures, nextCheckAt: saved.nextCheckAt,
+    message: '未取得有效更新，继续当前任务；到期后使用时再试，也可手动重查。'};
+}
+
+export async function checkUpdate(home, config, currentVersion, options = {}) {
+  const result = await checkVersion(home, config, currentVersion, options);
+  // Feedback has its own clock: a seven-day version interval must not hide replies.
+  const feedback = await checkFeedback(home, {...options, currentVersion, verifiedVersion: result.verifiedVersion});
+  return {...result, feedback};
 }
 
 export async function applyUpdate(home, {envelope, publicKey, currentVersion, approvedVersion, skillsDir, rulesFile}) {

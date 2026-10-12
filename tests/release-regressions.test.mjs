@@ -124,7 +124,7 @@ test('反馈查询只追加路径，保留渠道参数和原端点', async t => 
       assert.equal(url.origin, original.origin); assert.equal(url.search, original.search);
       assert.equal(url.pathname, `${original.pathname.replace(/\/$/u, '')}/${draft.report.id}`);
       assert.equal(options.headers.authorization, 'Bearer synthetic-token');
-      return new Response(JSON.stringify({status: 'received'}));
+      return new Response(JSON.stringify({id: draft.report.id, status: 'received'}));
     }});
     assert.equal(receipt.status, 'received');
   }

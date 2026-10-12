@@ -62,7 +62,7 @@ export async function main(argv = process.argv.slice(2)) {
     uninstall: () => uninstall(home, args[0]),
     'feedback-draft': async () => draftFeedback(home, await json(args[0])),
     'feedback-send': () => sendFeedback(home, args[0], args[1]),
-    'feedback-status': () => feedbackStatus(home, args[0]),
+    'feedback-status': () => feedbackStatus(home, args[0], {currentVersion: version, skillsDir: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')}),
     'feedback-delete': () => mutateState(home, s => {const n = s.feedback.length; s.feedback = s.feedback.filter(x => x.report.id !== args[0]); return {deleted: n - s.feedback.length, serverCopyDeleted: false};}),
     'correction': async () => recordCorrection(home, args[0], await json(args[1])),
     'resource': async () => resourceGate(home, await json(args[0])),
