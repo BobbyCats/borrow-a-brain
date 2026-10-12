@@ -2,6 +2,8 @@
 
 当前发行版本为 **0.1.8 体验版**。[GitHub Release](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.8) 与[官网发行清单](https://jclab.work/downloads/borrow-a-brain/releases.json)已同步。
 
+方法积累、反馈处理和版本更新的实际分工见 [迭代与更新流程](improvement-cycle.md)。当前没有后台更新任务或反馈修复主动通知；官方包也尚未配置独立备用更新源。
+
 0.1.8 合并任务范围与方法查询，调整收录预览、正文与卡片顺序，并补全参数帮助。本机 84 项程序测试、三平台六项 CI、四种正式包及八种旧版安装配置升级通过。参考模型最终 4 场、12 轮达到本轮目标；Luna 仍有路径枚举和输出质量限制，见 [0.1.8 验证记录](verification-0.1.8.md)。
 
 此前单纯前移范围说明的对照未达到采用门槛，未合并；结果保留在 [范围位置对照](verification-scope-placement.md)。此前本地修复见 [预览与任务切换](verification-preview-task-refresh.md)、[顺序与参数帮助](verification-card-order-help.md)和[自然纠正](verification-discovery-correction.md)。
