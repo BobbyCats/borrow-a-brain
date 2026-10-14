@@ -1,6 +1,6 @@
 # 开发与验证状态
 
-本次版本为 **0.1.10 体验版**。可下载版本以 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases) 和[官网发行清单](https://jclab.work/downloads/borrow-a-brain/releases.json)为准。
+当前发行版本为 **0.1.10 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.10) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
 
 ## 本版变化
 
