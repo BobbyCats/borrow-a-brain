@@ -1,12 +1,12 @@
 # 开发与验证状态
 
-当前发行版本为 **0.1.10 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.10) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
+当前发行版本为 **0.1.11 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.11) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
 
 ## 本版变化
 
-普通任务按需读取说明，选中方法后直接取得经过校验的内容。更新检查自动读取当前安装版本和已有配置。方法库、配置及保存、启用、更新安装的确认流程保持不变。
+「问到点上」在没有现成答案时，结合材料尝试不同解释，形成可检验的新联系。已有明确选择时继续给推荐和理由；明确执行任务直接交付。重复的收录提醒已合并，保存和启用的确认流程保持不变。
 
-固定对照已完成 22 段会话、38 轮输入。工具调用与累计 token 开销下降，方法在已测场景中保留具体作用。该结果只覆盖实际模型和固定任务，不代表所有回答质量普遍提高。完整范围及正式分发检查见 [0.1.10 验证记录](verification-0.1.10.md)。
+固定三题对照已完成。本次采用小幅体验改进，未据此承诺所有场景质量或速度提升。对照结果、采用依据与发行检查见 [0.1.11 验证记录](verification-0.1.11.md)。
 
 ## 当前支持
 
@@ -34,6 +34,6 @@
 
 ## 历史记录
 
-[0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
+[0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
 
 各版 CI 和对话结果只对应当时的提交与条件。方法积累、反馈处理和版本更新的分工见 [迭代与更新流程](improvement-cycle.md)。
