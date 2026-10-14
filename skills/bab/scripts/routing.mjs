@@ -2,6 +2,17 @@ import {randomUUID} from 'node:crypto';
 import {boundedString, mutateState, readState} from './store.mjs';
 import {getProfile, listProfiles} from './profiles.mjs';
 import {projectContext} from './environment.mjs';
+import {sourceChanges} from './materials.mjs';
+
+// Return the checked version's decision content once, without duplicating the
+// generated Skill, private trial transcripts or activation approval material.
+function executionProfile(p) {
+  return {id: p.id, name: p.name, version: p.version, scope: p.scope,
+    status: p.status, sourceStatus: p.sourceStatus, methods: p.record.methods,
+    boundaries: p.record.boundaries,
+    sources: p.record.sources.map(({id, role, ref, date, material}) => ({id, role, ref, date,
+      ...(material ? {material} : {})}))};
+}
 
 // The host model makes the semantic choice. This module enforces scope, versions and ownership.
 export async function routingCatalog(home, scope = 'personal') {
@@ -21,19 +32,25 @@ export async function saveRoute(home, input) {
   if (!Array.isArray(selected) || selected.length > 3) throw new Error('默认每次至多 3 份方法，更多视角应拆成明确的下一阶段。');
   if (selected.length && selected.filter(p => p.role === 'lead').length !== 1) throw new Error('多人协作必须恰好有一个主责方法。');
   if (new Set(selected.map(p => p.id)).size !== selected.length) throw new Error('同一档案不能重复入选。');
-  const result = [];
+  const result = [], checkedProfiles = [];
   for (const choice of selected) {
     if (!['lead', 'contributor', 'reviewer'].includes(choice.role)) throw new Error('协作角色只支持 lead（主责）、contributor（补充）、reviewer（检查）。');
     const p = await getProfile(home, choice.id, {scope});
     if (p.sourceStatus === 'needs-review') throw new Error('素材来源已变化，不能自动调用待复核方法。');
     if (p.status !== 'active') throw new Error('自动路由只能选择已启用的版本。');
     if (choice.version && choice.version !== p.version) throw new Error('选中版本已变化，请重新读取能力索引。');
+    checkedProfiles.push(p);
     result.push({id: p.id, name: p.name, version: p.version, role: choice.role,
       responsibility: boundedString(choice.responsibility, '本次分工', 1000), why: boundedString(choice.why, '选用理由', 1000)});
   }
   const plan = {taskId, scope, intent: boundedString(input.intent, '当前目标', 1000),
     deliverable: boundedString(input.deliverable, '本轮交付', 1000), selected: result, updatedAt: new Date().toISOString()};
   return mutateState(home, s => {
+    for (const p of checkedProfiles) {
+      const current = s.profiles.find(row => row.id === p.id && (row.scope === 'personal' || row.scope === scope));
+      if (current?.activeVersion !== p.version || !current.versions.some(v => v.version === p.version && v.approvalHash === p.approvalHash)) throw new Error('选中版本已变化，请重新读取能力索引。');
+      if (sourceChanges(p.record.sources, s).length) throw new Error('素材来源已变化，不能自动调用待复核方法。');
+    }
     const previous = s.tasks[`route:${taskId}`];
     if (previous && previous.scope !== scope) throw new Error('任务编号已属于其他范围，请生成新编号。');
     const ids = (value, label) => {
@@ -50,7 +67,7 @@ export async function saveRoute(home, input) {
       plan.checkpoint = {...previous.checkpoint, ...(changed ? {needsReview: true} : {})};
     }
     s.tasks[`route:${taskId}`] = plan;
-    return {...plan, selectionBy: 'host-model', execution: 'one-owner-sequential', note: '这是方法分工，不是后台代理已启动的证明。'};
+    return {...plan, profiles: checkedProfiles.map(executionProfile), selectionBy: 'host-model', execution: 'one-owner-sequential', note: 'profiles 已载入所选精确版本的方法与边界，可直接使用；需要原始摘录或试用记录时才 profile-get。分工记录不证明方法已实际应用。'};
   });
 }
 

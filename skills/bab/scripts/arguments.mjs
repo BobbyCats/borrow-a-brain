@@ -24,7 +24,7 @@ add('memory-query', 1, 2, '关键词 [范围]', [1]);
 add('setup', 1, 2, 'codex|claude 项目路径 [--apply]；用户级用 --user 代替项目路径', [], ['--apply', '--user']);
 add('uninstall', 1, 1, 'Skill 安装目录');
 add('feedback-send', 2, 2, '报告编号 确认摘要');
-add('update-check', 2, 2, '更新配置文件 当前版本 [--force]', [], ['--force']);
+add('update-check', 0, 2, '[更新配置文件 当前版本] [--force]', [], ['--force']);
 add('data-clear', 1, 1, '--confirmed');
 
 export function usageFor(command) {
@@ -45,7 +45,7 @@ export function parseArguments(command, args) {
       throw new Error(`不支持选项 ${arg}。用法：${usage}。范围使用位置参数，不使用 --scope。`);
     } else positional.push(arg);
   }
-  if (positional.length < spec.min || positional.length > spec.max) throw new Error(`参数数量不正确。用法：${usage}`);
+  if (positional.length < spec.min || positional.length > spec.max || (command === 'update-check' && positional.length === 1)) throw new Error(`参数数量不正确。用法：${usage}`);
   for (const index of spec.scopes) {
     const scope = positional[index];
     if (scope !== undefined && (scope.length > 500 || /[\r\n\0]/u.test(scope) || !/^(?:personal|project:.+)$/u.test(scope))) {

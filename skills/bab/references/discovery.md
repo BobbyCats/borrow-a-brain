@@ -27,7 +27,7 @@
 
 ## 先预览，再给用户看
 
-按 [本地操作](operations.md#主动收录) 调用 `profile-intake`，不传顶层 `userApproved` 或 `approvalHash`。实际返回 `status: preview`、`content` 和 `approvalHash` 后，才按返回内容展示方法卡与保存选项；在脑中拟好卡片不等于完成预览。参数报错先修正；只有命令实际失败或已核实缺少运行能力，才交付正文并说明收录未完成，不提供保存选项。未执行不能报失败，也不能绕过预览建档。未确认时不调用 profile-create、profile-save 或 memory-add 保存候选。临时参数只放本次任务私有临时目录，不建立持久候选池。
+用 `help profile-intake` 取得完整参数示例后调用 `profile-intake`，不传顶层 `userApproved` 或 `approvalHash`；非标准操作再查 [本地操作](operations.md#主动收录)。实际返回 `status: preview`、`content` 和 `approvalHash` 后，才按返回内容展示方法卡与保存选项；在脑中拟好卡片不等于完成预览。参数报错先修正；只有命令实际失败或已核实缺少运行能力，才交付正文并说明收录未完成，不提供保存选项。未执行不能报失败，也不能绕过预览建档。未确认时不调用 profile-create、profile-save 或 memory-add 保存候选。临时参数只放本次任务私有临时目录，不建立持久候选池。
 
 主动提议一次最多一项；用户明确要求批量回顾时再按该任务范围处理。用简短方法卡，正文面向本人，不混进要发给客户的成品：
 

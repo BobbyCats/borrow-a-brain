@@ -12,6 +12,8 @@
 
 `route-context [项目路径]` 一次返回规范化的 `scope` 与已启用方法 `catalog`，省略路径时使用当前工作目录。个人事务用 `route-context --personal`；不能同时指定项目路径。后续查询与保存沿用返回的 `scope`。已有 `context 项目路径` 和 `route-catalog 范围` 仍可分别查询路径与目录。范围是位置参数，例如 `profile-list 'project:/实际项目路径'`，不使用 `--scope`。`cli.mjs` 是模块，不是可执行入口。
 
+`route-save 参数文件` 同次校验所选版本后，在回执 `profiles` 中给出完整方法、整体边界和来源索引，可直接执行；无需重复 `profile-get`。只有核查原始摘录或试用记录时才读完整档案。执行内容不重复写入任务状态，原有分工、排除项和进度机制不变。简短完整参数见 `help route-save`。
+
 数据位置由 `BAB_HOME` 覆盖；默认 macOS 是用户 Library/Application Support/borrow-a-brain，Windows 是 LOCALAPPDATA/borrow-a-brain，Linux 是 XDG_DATA_HOME/borrow-a-brain 或 ~/.local/share/borrow-a-brain。
 
 ## 安装
