@@ -1,7 +1,19 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash, randomUUID} from 'node:crypto';
+import {setTimeout as delay} from 'node:timers/promises';
 import {mutateState, readState, isWithin} from './store.mjs';
+
+// Antivirus and the Windows loader can briefly retain handles after a process exits.
+// Retry only failed atomic renames; never delete or overwrite the destination to force progress.
+export async function renameForInstall(from, to) {
+  for (let attempt=0;;attempt++) {
+    try {return await fs.rename(from,to);} catch (error) {
+      if (!['EPERM','EACCES','EBUSY'].includes(error.code) || attempt>=6) throw error;
+      await delay(Math.min(50 * 2 ** attempt,800));
+    }
+  }
+}
 
 export const hash = value => createHash('sha256').update(value).digest('hex');
 const START = '<!-- borrow-a-brain:start -->';
@@ -29,14 +41,14 @@ export async function replaceSkillKeepingLauncher(dest, stage, undo, cleanup) {
   const backup = path.join(path.dirname(dest), `.bab-backup-${randomUUID()}`);
   await fs.mkdir(backup); cleanup.push(backup);
   for (const name of (await fs.readdir(dest)).filter(name => name !== 'bin')) {
-    await fs.rename(path.join(dest, name), path.join(backup, name));
+    await renameForInstall(path.join(dest, name), path.join(backup, name));
     undo.push(async () => {
       await fs.rm(path.join(dest, name), {recursive: true, force: true});
-      await fs.rename(path.join(backup, name), path.join(dest, name));
+      await renameForInstall(path.join(backup, name), path.join(dest, name));
     });
   }
   for (const name of (await fs.readdir(stage)).filter(name => name !== 'bin')) {
-    await fs.rename(path.join(stage, name), path.join(dest, name));
+    await renameForInstall(path.join(stage, name), path.join(dest, name));
     undo.push(() => fs.rm(path.join(dest, name), {recursive: true, force: true}));
   }
 }
@@ -144,10 +156,10 @@ export async function install(home, {source, skillsDir, rulesFile, scopeRoot, ap
         }
         if (await exists(dest)) {
           const backup = path.join(skillsDir, `.bab-backup-${randomUUID()}`);
-          await fs.rename(dest, backup); cleanup.push(backup);
-          undo.push(async () => {await fs.rm(dest, {recursive: true, force: true}); await fs.rename(backup, dest);});
+          await renameForInstall(dest, backup); cleanup.push(backup);
+          undo.push(async () => {await fs.rm(dest, {recursive: true, force: true}); await renameForInstall(backup, dest);});
         } else undo.push(() => fs.rm(dest, {recursive: true, force: true}));
-        await fs.rename(stage, dest);
+        await renameForInstall(stage, dest);
       }
       const rulesExisted = await exists(rulesFile);
       if (rulesExisted && (await fs.lstat(rulesFile)).isSymbolicLink()) throw new Error('规则文件是符号链接，请使用其真实路径。');
@@ -186,7 +198,7 @@ export async function uninstall(home, skillsDir) {
       if (!text.includes(row.block)) throw new Error('路由区块已修改，请先人工合并。');
       for (const id of Object.keys(row.files)) {
         const dest = path.join(skillsDir, id), backup = path.join(skillsDir, `.bab-uninstall-${randomUUID()}`);
-        await fs.rename(dest, backup); backups.push(backup); undo.push(() => fs.rename(backup, dest));
+        await renameForInstall(dest, backup); backups.push(backup); undo.push(() => fs.rename(backup, dest));
       }
       undo.push(() => fs.writeFile(row.rulesFile, text));
       await fs.writeFile(row.rulesFile, text.replace(row.block, ''));

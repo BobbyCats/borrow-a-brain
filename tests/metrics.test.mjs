@@ -34,3 +34,10 @@ test('HTTP receiver and private summary require the correct permissions',async t
  assert.equal((await fetch(base+'/v1/metrics',options)).status,200);assert.equal((await fetch(base+'/v1/metrics',options)).status,200);
  const summary=await (await fetch(base+'/admin/analytics',{headers:{authorization:'Bearer test-admin-token-32-characters-long-secret'}})).json();assert.equal(summary.metrics.verificationReceipts,1);assert.equal(summary.metrics.totals.install_success,0);assert.equal(summary.logs,null);
 });
+
+test('installer waits for transient filesystem handles without forcing replacement',async t=>{
+ const {renameForInstall}=await import('../skills/bab/scripts/install.mjs');const {home}=await fixture(t),from=path.join(home,'source'),to=path.join(home,'destination');await fs.mkdir(from);await fs.writeFile(path.join(from,'keep.txt'),'preserved');
+ const rename=fs.rename;let attempts=0;const mock=t.mock.method(fs,'rename',async(a,b)=>{if(attempts++===0)throw Object.assign(Error('scanner lock'),{code:'EPERM'});return rename(a,b);});
+ await renameForInstall(from,to);assert.equal(attempts,2);assert.equal(await fs.readFile(path.join(to,'keep.txt'),'utf8'),'preserved');mock.mock.restore();
+ await assert.rejects(renameForInstall(from,to),{code:'ENOENT'});
+});
