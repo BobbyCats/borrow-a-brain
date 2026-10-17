@@ -31,7 +31,7 @@
 
 案例依据真实备课记录脱敏改写，展示方法提炼环节。保存和启用流程见下文。
 
-[查看提炼过程与适用条件](docs/examples/presentation-choices.md)
+[查看提炼过程与适用条件](https://github.com/BobbyCats/borrow-a-brain/blob/main/docs/examples/presentation-choices.md)
 
 ## 安装
 
@@ -97,7 +97,7 @@ AI 会整理问题和复现步骤，你确认正文和接收地址后才发送�
 
 当前为预览版，方法选择与分析质量取决于所用模型和材料。WorkBuddy 请在代码开发项目中使用，并按安装指南确认技能已加载。独立包未经过 macOS 公证或 Windows 代码签名；遇到系统拦截时，可使用 Node.js 源码包。
 
-[常见问题](docs/quickstart.md#常见问题) · [验证范围](docs/status.md) · [MIT 许可证](LICENSE) · [第三方声明](THIRD_PARTY_NOTICES.md)
+[常见问题](docs/quickstart.md#常见问题) · [技术说明](https://github.com/BobbyCats/borrow-a-brain/blob/main/docs/status.md) · [MIT 许可证](LICENSE) · [第三方声明](THIRD_PARTY_NOTICES.md)
 
 <!-- maintainer-docs -->
 ## 开发与贡献
