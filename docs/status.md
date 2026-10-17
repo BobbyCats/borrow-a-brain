@@ -4,7 +4,7 @@
 
 ## 本版变化
 
-0.1.19 修复随包历史更新记录的参考链接。0.1.18 已在 GitHub 发布，原始附件保留。
+0.1.19 修复随包历史更新记录的参考链接。官网、四种安装包和本机已同步；公开下载、升级与资料保留检查通过。详见 [0.1.19 发布记录](verification-0.1.19.md)。0.1.18 原始 GitHub 附件保留。
 
 修订产品介绍、安装指南、三次上手练习、素材指南和公开案例，按用户任务说明操作与结果。研发验证记录保留在技术文档中。更新说明明确七天检查间隔、同版一次提醒、应用加载和网络前提。
 
@@ -39,6 +39,6 @@
 
 ## 历史记录
 
-[0.1.16](verification-0.1.16.md) · [0.1.15](verification-0.1.15.md) · [0.1.14](verification-0.1.14.md) · [0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
+[0.1.18](verification-0.1.18.md) · [0.1.17](verification-0.1.17.md) · [0.1.16](verification-0.1.16.md) · [0.1.15](verification-0.1.15.md) · [0.1.14](verification-0.1.14.md) · [0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
 
 各版 CI 和对话结果只对应当时的提交与条件。方法积累、反馈处理和版本更新的分工见 [迭代与更新流程](improvement-cycle.md)。
