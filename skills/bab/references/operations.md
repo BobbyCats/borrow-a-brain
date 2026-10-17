@@ -147,6 +147,8 @@ WorkBuddy 原生历史读取未支持。用户选定的材料可直接分析；�
 
 安装预览中说明这项可选功能，询问是否愿意参加。用户没有明确同意就保持关闭；拒绝后不重复询问。升级保留原选择，不重新默认开启。
 
+若 `config-get` 中没有 metricsEndpoint，先向用户展示随包可信作者配置中的统计地址。只有用户同意参加并同意补充该地址时，才用 `config-set` 合并此字段；保留原有反馈、更新和公钥配置。缺地址时不发送，不自动覆盖本地配置。
+
 实际安装完成后，在私有参数文件填写 `{"skillsDir":"实际安装目录","host":"codex","enabled":true,"userApproved":true}`，通过 `<运行入口> metrics-consent 参数文件` 开启。host 仅为 codex / claude / workbuddy / other。关闭传 enabled:false，不需要 userApproved。参数文件不得进 Git。
 
 `metrics-status` 查看本安装的选择；`metrics-flush` 重试未发送回执。宿主完成第一项实际任务后执行 `metrics-first-use --confirmed`。这表示宿主确认任务已完成，不代表用户满意或长期活跃。安装成功与首次使用分别去重。升级和旧安装首次参加统计单列，不冒充新安装。关闭会清除待发队列，已收到的聚合统计不会随本机删除。

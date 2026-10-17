@@ -23,3 +23,14 @@ test('existing installs, retry deduplication and test isolation',async t=>{const
 test('semantic dedup covers repeated client identities and parallel sends',async t=>{const {home}=await fixture(t);const p={schema:1,id:randomUUID(),installationId:randomUUID(),event:'install_success',version:'0.1.20',os:'linux',host:'other',occurredAt:new Date().toISOString()};
  await Promise.all([receiveMetrics(home,p),receiveMetrics(home,p)]);await receiveMetrics(home,{...p,id:randomUUID()});assert.equal((await metricsSummary(home)).totals.install_success,1);
 });
+
+test('HTTP receiver and private summary require the correct permissions',async t=>{
+ const {home}=await fixture(t),{consoleServer,passwordHash}=await import('../server/console.mjs');
+ const server=consoleServer({home:path.join(home,'inbox'),adminToken:'test-admin-token-32-characters-long-secret',loginHash:passwordHash('test-password'),origin:'https://example.com',html:path.join(home,'none.html'),versions:async()=>['0.1.20'],analyticsHome:path.join(home,'analytics'),logSummary:path.join(home,'missing.json')});
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>server.close(r)));const base='http://127.0.0.1:'+server.address().port;
+ assert.equal((await fetch(base+'/admin/analytics')).status,401);
+ const payload={schema:1,id:randomUUID(),installationId:randomUUID(),event:'install_success',version:'0.1.20',os:'linux',host:'other',occurredAt:new Date().toISOString(),test:true};
+ const options={method:'POST',headers:{'content-type':'application/json','idempotency-key':payload.id},body:JSON.stringify(payload)};
+ assert.equal((await fetch(base+'/v1/metrics',options)).status,200);assert.equal((await fetch(base+'/v1/metrics',options)).status,200);
+ const summary=await (await fetch(base+'/admin/analytics',{headers:{authorization:'Bearer test-admin-token-32-characters-long-secret'}})).json();assert.equal(summary.metrics.verificationReceipts,1);assert.equal(summary.metrics.totals.install_success,0);assert.equal(summary.logs,null);
+});
