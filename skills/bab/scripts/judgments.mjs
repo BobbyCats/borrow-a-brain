@@ -93,7 +93,7 @@ export async function setJudgments(home, taskId, input) {
   const reason = boundedString(input.reason, '变更理由', 4000);
   return mutateState(home, s => {
     const row = existing(s, taskId, input.scope, input.expectedRevision);
-    const updates = input.nodes.map(n => nodeFrom(n, row.nodes.find(old => old.id === n.id)));
+    const updates = input.nodes.map(n => nodeFrom(n, row.nodes.find(old => old.id === id(n.id))));
     const ids = new Set(updates.map(n => n.id));
     if (ids.size !== updates.length) throw new Error('判断编号不能重复。');
     // Walk the old graph before replacing edges: dropping a premise still

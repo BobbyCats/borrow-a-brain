@@ -44,6 +44,9 @@ test('原图边被替换也使后续决定失效；并发旧版本不能覆盖',
   const r = await setJudgments(home, 'case', {scope: 'personal', expectedRevision: 1, reason: '改行动', nodes: [{...node('trial', 'decision', 'working'), claim: '改为小样实验'}]});
   assert.equal(r.nodes.find(n => n.id === 'budget').status, 'needs-review');
   await assert.rejects(challengeJudgment(home, 'case', {scope: 'personal', expectedRevision: 1, targets: ['other'], evidence: {summary: '过时写入', source: '测试'}}), /版本已变化/u);
+  const normalized = await setJudgments(home, 'case', {scope: 'personal', expectedRevision: 2, reason: '编号首尾空格不能重置版本', nodes: [node(' trial ', 'decision', 'working')]});
+  assert.equal(normalized.nodes.find(n => n.id === 'trial').revision, 3);
+  await assert.rejects(setJudgments(home, 'case', {scope: 'personal', expectedRevision: 3, reason: '不能绕过类型检查', nodes: [node(' trial ', 'hypothesis', 'working')]}), /不能更换类型/u);
 });
 test('拒绝循环、悬空、重复节点和决定伪装成因果证明；失败事务不落盘', async t => {
   const home = await fixture(t);
