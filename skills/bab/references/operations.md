@@ -13,7 +13,7 @@
 
 `doctor` 查看环境，只探测已知宿主目录是否存在。`help` 列出命令，`help 命令名` 查看该命令参数。脚本输出 JSON；退出码非零代表失败，不能当作已完成或空目录。未知选项、额外参数和非法范围会报错。
 
-`route-context [项目路径]` 一次返回规范化的 `scope` 与已启用方法 `catalog`，省略路径时使用当前工作目录。个人事务用 `route-context --personal`；不能同时指定项目路径。后续查询与保存沿用返回的 `scope`。已有 `context 项目路径` 和 `route-catalog 范围` 仍可分别查询路径与目录。范围是位置参数，例如 `profile-list 'project:/实际项目路径'`，不使用 `--scope`。`cli.mjs` 是模块，不是可执行入口。
+`route-context [项目路径]` 一次返回规范化的 `scope` 与已启用方法 `catalog`，省略路径时使用当前工作目录。个人事务或没有明确项目时用 `route-context --personal`；不能同时指定项目路径。后续方法查询与任务分工沿用返回的 `scope`；新方法收录另按 [建议保存范围](people.md#建议保存范围) 判断。已有 `context 项目路径` 和 `route-catalog 范围` 仍可分别查询路径与目录。范围是位置参数，例如 `profile-list 'project:/实际项目路径'`，不使用 `--scope`。`cli.mjs` 是模块，不是可执行入口。
 
 `route-save 参数文件` 同次校验所选版本后，在回执 `profiles` 中给出完整方法、整体边界和来源索引，可直接执行；无需重复 `profile-get`。只有核查原始摘录或试用记录时才读完整档案。执行内容不重复写入任务状态，原有分工、排除项和进度机制不变。简短完整参数见 `help route-save`。
 
@@ -101,7 +101,7 @@ profile-save 与 profile-get 返回 `readiness`，包含 readyToActivate、block
 参数：
 
 - `requestId`：该项提议的稳定编号，重试沿用；内容发生实质变化后用新编号。
-- `scope`：显式提供 路由返回的 personal 或 project: 范围；没有默认全局范围。
+- `scope`：显式填写建议保存的 personal 或已明确的 project: 范围。可跨项目的方法优先建议 personal，不能直接照搬当前任务范围；范围随内容预览并确认，脚本不自动选择。
 - `reason`：向用户展示的具体推荐理由。
 - `profile`：新建时的 name、aliases、kind=method、purpose。范围只取上层 scope。
 - `version`：上一节的完整版本对象。未试用的 evaluations 留空或标 unrun，不能为了保存填 pass。

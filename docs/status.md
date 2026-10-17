@@ -1,12 +1,12 @@
 # 开发与验证状态
 
-当前发行版本为 **0.1.13 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.13) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
+当前发行版本为 **0.1.14 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.14) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
 
 ## 本版变化
 
-合并自然接话修订与 0.1.12 的自动启动器修复。语气随当前问题和读者调整，允许贴切的口语、成语和幽默；保留开放推导与 Aha moment 的增强，不设置固定口头禅。
+收录方法时，按内容建议个人通用或项目专用。可跨项目复用的做法优先建议个人通用，已有方法保持原范围。查询提示注明实际范围，区分暂无可用方法、本次不适用和查询失败。
 
-语气修订沿用发布前已完成的三题小对照，不新增题目或重跑对照。正式包、官网与本机更新已完成。发行包与安装升级检查见 [0.1.13 验证记录](verification-0.1.13.md)。
+本次发布沿用已完成的跨项目试用与不适用场景记录，不重跑模型对照。发行包和安装升级检查见 [0.1.14 验证记录](verification-0.1.14.md)。
 
 ## 当前支持
 
@@ -34,6 +34,6 @@
 
 ## 历史记录
 
-[0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
+[0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
 
 各版 CI 和对话结果只对应当时的提交与条件。方法积累、反馈处理和版本更新的分工见 [迭代与更新流程](improvement-cycle.md)。

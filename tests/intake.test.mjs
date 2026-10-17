@@ -6,7 +6,7 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {intakeProfile, saveProfileVersion, activateProfile, getProfile, deleteProfile, listProfiles} from '../skills/bab/scripts/profiles.mjs';
-import {routingCatalog} from '../skills/bab/scripts/routing.mjs';
+import {routingCatalog, routingContext} from '../skills/bab/scripts/routing.mjs';
 import {readState} from '../skills/bab/scripts/store.mjs';
 
 async function sandbox(t) {
@@ -73,6 +73,37 @@ test('确认后只保存草稿，并发重试不产生重复档案或版本', as
   assert.equal(await fs.readFile(path.join(home, 'state.json'), 'utf8'), before);
   await assert.rejects(intakeProfile(home, {...confirmed, approvalHash: 'wrong'}), /不匹配/u);
   await assert.rejects(intakeProfile(home, {...confirmed, reason: '改写同编号内容'}), /不同内容/u);
+});
+
+test('项目任务可提议个人通用方法；确认和启用分开，原项目档案保持隔离', async t => {
+  const home = await sandbox(t), root = path.dirname(home);
+  const projects = [path.join(root, 'project-a'), path.join(root, 'mixed-files')];
+  for (const project of projects) await fs.mkdir(project);
+  const context = await routingContext(home, {project: projects[0]});
+  const original = {...proposal('project-original'), scope: context.scope};
+  original.version = evaluated(original.version);
+  const {saved: old} = await save(home, original);
+  await activateProfile(home, old.id, old.version, old.approvalHash, context.scope);
+  const oldProfile = await getProfile(home, old.id, {scope: context.scope});
+  const input = {...proposal('personal-derived'), scope: 'personal'};
+  const before = await fs.readFile(path.join(home, 'state.json'), 'utf8');
+  const preview = await intakeProfile(home, input);
+  assert.equal(preview.content.scope, 'personal');
+  assert.equal(await fs.readFile(path.join(home, 'state.json'), 'utf8'), before);
+  const draft = await intakeProfile(home, {...input, userApproved: true, approvalHash: preview.approvalHash});
+  assert.deepEqual((await routingCatalog(home, context.scope)).map(p => p.id), [old.id]);
+  assert.deepEqual(await routingCatalog(home, 'personal'), []);
+  assert.equal((await listProfiles(home, context.scope)).length, 2);
+  assert.deepEqual((await listProfiles(home, 'personal')).map(p => p.id), [draft.id]);
+  const trial = await saveProfileVersion(home, draft.id, evaluated(input.version));
+  assert.deepEqual(await routingCatalog(home, 'personal'), []);
+  await activateProfile(home, draft.id, trial.version, trial.approvalHash, 'personal');
+  assert.deepEqual((await routingCatalog(home, context.scope)).map(p => p.id).sort(), [old.id, draft.id].sort());
+  assert.deepEqual((await routingContext(home, {project: projects[1]})).catalog.map(p => p.id), [draft.id]);
+  assert.deepEqual((await routingContext(home, {personal: true})).catalog.map(p => p.id), [draft.id]);
+  await assert.rejects(getProfile(home, old.id, {scope: 'personal'}));
+  assert.deepEqual(await getProfile(home, old.id, {scope: context.scope}), oldProfile);
+  for (const project of projects) assert.deepEqual(await fs.readdir(project), []);
 });
 
 test('修订绑定原档案、范围与最新基准；新草稿不替换已启用版本', async t => {

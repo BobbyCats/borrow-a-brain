@@ -80,13 +80,13 @@ export async function main(argv = process.argv.slice(2)) {
     help: async () => {
       if (!args[0]) return {name: '借个脑子', version, commands: Object.keys(commands),
         usage: '大部分变更命令接收 JSON 文件。参见 references/operations.md。不要把私人参数文件放入 Git。', dataHome: home};
-      const result = {command: args[0], usage: usageFor(args[0]), scope: '需要范围时沿用 route-context 返回的 scope；参数形式见 usage 与 references/operations.md。'};
+      const result = {command: args[0], usage: usageFor(args[0]), scope: '方法查询与任务分工沿用 route-context 返回的 scope；新方法收录按内容建议保存范围并确认。参数形式见 usage 与 references/operations.md。'};
       if (args[0] === 'update-check') return {...result,
         defaults: '不带位置参数时，自动读取当前数据目录的作者配置（没有则用本安装内置配置）和本安装的版本。配置损坏时报错，不回退或改写配置。',
         explicit: '需要指定时，更新配置文件与当前版本必须一起提供；文件格式为 {"sources":[],"publicKey":null}。',
         force: '--force 仅跳过检查间隔，不跳过签名校验，也不安装更新。',
         confirmation: '仅检查版本和已发送反馈；安装仍需展示变化并取得用户确认。'};
-      if (args[0] === 'route-context') return {...result, scope: '位置参数是项目目录，不是 project: 范围。省略时使用命令工作目录；个人事务改用 --personal。返回 scope 和 catalog，后续查询与保存沿用 scope。'};
+      if (args[0] === 'route-context') return {...result, scope: '位置参数是项目目录，不是 project: 范围；应使用本次任务已明确的项目。省略时使用命令工作目录；个人事务或没有明确项目时用 --personal。返回 scope 和 catalog，方法查询与任务分工沿用 scope；新方法的保存范围另按内容建议并确认。'};
       if (args[0] === 'route-save') return {...result,
         scope: 'JSON 的 scope 沿用 route-context 回执。新任务使用新 taskId；已有任务的排除项会保留。',
         example: {taskId: 'example-task', scope: 'project:实际项目路径', intent: '当前要完成什么', deliverable: '本轮交付',
@@ -97,11 +97,11 @@ export async function main(argv = process.argv.slice(2)) {
       if (args[0] !== 'profile-intake') return result;
       const exampleVersion = await json(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'examples', 'profile-version.json'));
       return {...result,
-        scope: '在 JSON 的 scope 字段明确填写 personal 或 context 返回的 project: 范围，不是额外位置参数。',
+        scope: '在 JSON 的 scope 字段填写建议保存的 personal 或已明确的 project: 范围，不是额外位置参数。跨项目可用的方法优先建议 personal；显示具体内容和范围后，由用户确认保存。',
         exampleSource: 'bab/assets/examples/profile-version.json',
         fields: {
           requestId: '非空字符串；同一提议重试沿用编号。示例编号需替换。',
-          scope: '非空字符串；示例范围需替换为用户确认的实际范围。',
+          scope: '非空字符串；按方法内容建议范围，不直接照搬当前任务项目。预览不等于用户确认。',
           reason: '非空字符串；这项候选值得保存的具体理由。',
           profile: '新建对象：name、kind=method、purpose；aliases 可选。',
           target: '修订时替代 profile：id、version、approvalHash，取自目标版本回读。',
@@ -110,7 +110,7 @@ export async function main(argv = process.argv.slice(2)) {
           'version.sources[].date': '必填字符串；真实时间未知时明确写“未知”，不要推测日期。',
           'version.evaluations': '未试用留空或 result=unrun，不得伪填 pass。'
         },
-        example: {requestId: 'example-intake-preview', scope: 'project:synthetic-example',
+        example: {requestId: 'example-intake-preview', scope: 'personal',
           reason: exampleVersion.methods[0].reason,
           profile: {name: exampleVersion.methods[0].name, kind: 'method', purpose: exampleVersion.capabilities[0].task},
           version: exampleVersion},
