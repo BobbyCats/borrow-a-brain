@@ -5,6 +5,8 @@ description: "借个高手：从视频、音频、PDF、文档、会议纪要、
 
 # 借个高手 · Borrow a Mind
 
+执行任何本地命令前，沿用 [总入口的运行入口](../bab/SKILL.md#所有命令的运行入口)；启动器自动选择独立程序或 Node.js。
+
 先理解用户要解决什么，再读取 [借用方法流程](../bab/references/roles/borrow.md)。
 
 按 [调用声明](../bab/references/disclosure.md) 合并展示实际入口与方法状态。新提炼、已保存草稿和已启用方法分开说明。保留已知信息，不重复询问。

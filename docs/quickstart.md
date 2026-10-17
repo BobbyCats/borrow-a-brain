@@ -13,7 +13,7 @@
 | x64 Linux | `borrow-a-brain-linux-x64.zip` |
 | 其他架构，或已安装 Node.js 22+ | `borrow-a-brain-source.zip` |
 
-前三种安装包自带运行程序。源码包需要 Node.js 22+，不需要安装 npm 依赖。
+安装 Agent 负责选择匹配安装包和准备必要依赖。前三种安装包自带运行程序，无需安装 Node.js 或 Bun。源码包需要 Node.js 22+，不需要安装 npm 依赖；缺少兼容版本且没有匹配独立包时，由 Agent 从 Node.js 官网准备运行环境并纳入安装预览。
 
 在 Codex 或 Claude Code 中提供解压后的文件夹，输入：
 
@@ -31,26 +31,26 @@
 
 在当前安装包的解压目录或仓库根目录运行，将示例路径替换为一个已存在的项目目录。历史安装包使用其包内说明。
 
-源码包使用 Node.js：
+两种安装包共用启动器。以下以 macOS / Linux 为例：
 
 ```sh
-node skills/bab/scripts/run.mjs setup codex "/absolute/path/to/project"
+sh "skills/bab/scripts/run.sh" setup codex "/absolute/path/to/project"
 ```
 
 命令默认只生成安装预览。检查目录和规则后，加上 `--apply` 执行：
 
 ```sh
-node skills/bab/scripts/run.mjs setup codex "/absolute/path/to/project" --apply
+sh "skills/bab/scripts/run.sh" setup codex "/absolute/path/to/project" --apply
 ```
 
 Claude Code 用户将 `codex` 换成 `claude`。Windows 用户将项目路径换为 Windows 绝对路径，例如 `C:\Users\YourName\Documents\my-project`。
 
-独立程序包使用相同参数，仅替换命令入口：
+启动器自动使用包内程序，没有独立程序时检查 Node.js 22+。Windows 使用相同参数：
 
 | 平台 | 命令入口 |
 | --- | --- |
-| macOS / Linux | `./skills/bab/bin/bab` |
-| Windows PowerShell | `.\skills\bab\bin\bab.exe` |
+| macOS / Linux | `sh "skills/bab/scripts/run.sh"` |
+| Windows PowerShell | `& ".\skills\bab\scripts\run.cmd"` |
 
 安装位置如下：
 

@@ -17,14 +17,22 @@ const base = packageIndex >= 0 ? path.resolve(process.argv[packageIndex + 1]) : 
 const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'bab-installed-'));
 const home = path.join(temp, 'data'), skillsDir = path.join(temp, 'host', 'skills'), rulesFile = path.join(temp, 'host', 'AGENTS.md');
 const env = {...process.env, BAB_HOME: home};
-const binName = process.platform === 'win32' ? 'bab.exe' : 'bab';
+if (native) {
+  const tools = path.join(temp, 'no-node-tools'); await fs.mkdir(tools);
+  if (process.platform !== 'win32') await fs.symlink('/usr/bin/dirname', path.join(tools, 'dirname'));
+  env.PATH = tools;
+}
 let installed = false;
 async function argsFile(value) {const file = path.join(temp, `input-${Math.random().toString(16).slice(2)}.json`); await fs.writeFile(file, JSON.stringify(value)); return file;}
 function run(...args) {
   const entry = installed ? path.join(skillsDir, 'bab') : path.join(base, 'skills', 'bab');
-  const executable = native ? path.join(entry, 'bin', binName) : process.execPath;
-  const commandArgs = native ? args : [path.join(entry, 'scripts', 'run.mjs'), ...args];
-  const result = spawnSync(executable, commandArgs, {encoding: 'utf8', env});
+  const windows = process.platform === 'win32';
+  const executable = windows ? process.env.ComSpec : '/bin/sh';
+  const launcher = path.join(entry, 'scripts', windows ? 'run.cmd' : 'run.sh');
+  const commandArgs = windows
+    ? ['/d', '/s', '/c', `"${[launcher, ...args].map(arg => `"${arg}"`).join(' ')}"`]
+    : [launcher, ...args];
+  const result = spawnSync(executable, commandArgs, {encoding: 'utf8', env, windowsVerbatimArguments: windows});
   if (result.status !== 0) throw new Error(`CLI ${args[0]} failed: ${result.stderr}`);
   return JSON.parse(result.stdout);
 }
@@ -56,5 +64,5 @@ try {
   assert.equal(run('uninstall', skillsDir).uninstalled.length, 5);
   assert.ok(!(await fs.readFile(rulesFile, 'utf8')).includes('borrow-a-brain:start'));
   assert.equal(JSON.parse(await fs.readFile(path.join(home, 'state.json'), 'utf8')).rules[0].id, rule.id);
-  console.log(JSON.stringify({mode: native ? 'standalone' : 'node', platform: `${process.platform}-${process.arch}`, installedSkills: 5, separateProcessRecall: 'passed', signedSourceUpdate: 'passed', launcherAfterUpdate: 'passed', uninstall: 'passed', personalDataPreserved: true}));
+  console.log(JSON.stringify({mode: native ? 'standalone' : 'node', platform: `${process.platform}-${process.arch}`, automaticLauncher: 'passed', externalNodeAvailable: !native, installedSkills: 5, separateProcessRecall: 'passed', signedSourceUpdate: 'passed', launcherAfterUpdate: 'passed', uninstall: 'passed', personalDataPreserved: true}));
 } finally {await fs.rm(temp, {recursive: true, force: true});}

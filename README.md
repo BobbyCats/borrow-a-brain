@@ -28,7 +28,7 @@
 
 安装会添加五个 Skill，并在 `AGENTS.md` 或 `CLAUDE.md` 中加入自动调用说明。默认安装到一个项目；希望所有项目都能用时，说明“安装到用户级”。
 
-Apple 芯片 Mac、Windows x64、Linux x64 的安装包自带运行程序。其他架构可使用通用源码包，需要 Node.js 22+，无需安装 npm 依赖。
+安装 Agent 负责选择安装包和准备必要依赖。Apple 芯片 Mac、Windows x64、Linux x64 的独立包自带运行程序，无需安装 Node.js 或 Bun。源码包需要 Node.js 22+，无需安装 npm 依赖。所有命令通过统一启动器自动选择运行时，普通用户无需补充入口提示。
 
 命令行安装、环境要求和故障处理见 [使用指南](docs/quickstart.md)。GitHub 自动生成的 Source code 是仓库快照；首次安装请选择官网或 Release 附件中的安装包。
 

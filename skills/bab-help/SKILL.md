@@ -5,6 +5,8 @@ description: "带我上手：用户不会使用借个脑子、不记得命令、
 
 # 带我上手 · Show Me How
 
+执行任何本地命令前，沿用 [总入口的运行入口](../bab/SKILL.md#所有命令的运行入口)；启动器自动选择独立程序或 Node.js。
+
 读取 [使用帮助](../bab/references/roles/help.md)，按 [调用声明](../bab/references/disclosure.md) 展示实际入口与方法状态。
 
 用户问怎么提供视频、音频、PDF、书籍或照片时，按 [素材指南](../bab/assets/materials-guide.md) 教他最少要给什么。用户已提供素材时先试读，别把格式处理交还给用户。

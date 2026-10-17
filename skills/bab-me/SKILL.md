@@ -5,6 +5,8 @@ description: "懂我一点：用户想从自己的聊天、语音日记、会议
 
 # 懂我一点 · Know Me
 
+执行任何本地命令前，沿用 [总入口的运行入口](../bab/SKILL.md#所有命令的运行入口)；启动器自动选择独立程序或 Node.js。
+
 读取 [认识自己流程](../bab/references/roles/self.md)。先说明使用的材料范围，再提炼观察。
 
 按 [调用声明](../bab/references/disclosure.md) 合并展示实际调用链与方法状态。
