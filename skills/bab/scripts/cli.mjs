@@ -14,6 +14,7 @@ import {readConfig, saveConfig} from './config.mjs';
 import {setup} from './setup.mjs';
 import {importMaterial, listMaterials, getMaterial, deleteMaterial, cleanupMaterials} from './materials.mjs';
 import {parseArguments, usageFor} from './arguments.mjs';
+import {startJudgment, setJudgments, challengeJudgment, loadJudgment, listJudgments, deleteJudgment} from './judgments.mjs';
 
 export async function main(argv = process.argv.slice(2)) {
   const [command = 'help', ...rawArgs] = argv;
@@ -45,6 +46,12 @@ export async function main(argv = process.argv.slice(2)) {
     'route-load': () => loadRoute(home, args[0], args[1] || 'personal'),
     'route-list': () => listRoutes(home, {scope: args[0] || 'personal', query: args[1] || ''}),
     'route-checkpoint': async () => checkpointRoute(home, args[0], await json(args[1])),
+    'judgment-start': async () => startJudgment(home, await json(args[0])),
+    'judgment-set': async () => setJudgments(home, args[0], await json(args[1])),
+    'judgment-challenge': async () => challengeJudgment(home, args[0], await json(args[1])),
+    'judgment-load': () => loadJudgment(home, args[0], args[1]),
+    'judgment-list': () => listJudgments(home, args[0]),
+    'judgment-delete': () => deleteJudgment(home, args[0], args[1]),
     'history-grant': async () => grantHistory(home, await json(args[0])),
     'history-read': () => readHistory(home, args[0], {limit: args[1] ? Number(args[1]) : 10}),
     'history-revoke': () => revokeHistory(home, args[0]),
@@ -56,7 +63,7 @@ export async function main(argv = process.argv.slice(2)) {
     install: async () => install(home, await json(args[0])),
     setup: () => {
       const [host, ...rest] = args;
-      if (rest.some(a => a.startsWith('--') && !['--apply', '--user'].includes(a)) || rest.filter(a => !a.startsWith('--')).length > 1) throw new Error('用法：setup codex|claude 项目路径 [--apply]；全局安装用 --user 代替项目路径。');
+      if (rest.some(a => a.startsWith('--') && !['--apply', '--user'].includes(a)) || rest.filter(a => !a.startsWith('--')).length > 1) throw new Error(`用法：${usageFor('setup')}`);
       return setup(home, {host, project: rest.find(a => !a.startsWith('--')), global: rest.includes('--user'), apply: rest.includes('--apply')});
     },
     uninstall: () => uninstall(home, args[0]),
@@ -87,6 +94,11 @@ export async function main(argv = process.argv.slice(2)) {
         force: '--force 仅跳过检查间隔，不跳过签名校验，也不安装更新。',
         confirmation: '仅检查版本和已发送反馈；安装仍需展示变化并取得用户确认。'};
       if (args[0] === 'route-context') return {...result, scope: '位置参数是项目目录，不是 project: 范围；应使用本次任务已明确的项目。省略时使用命令工作目录；个人事务或没有明确项目时用 --personal。返回 scope 和 catalog，方法查询与任务分工沿用 scope；新方法的保存范围另按内容建议并确认。'};
+      if (args[0].startsWith('judgment-')) return {...result, reference: 'references/judgments.md',
+        semantics: '保存获准的任务判断；working 不等于因果已证明。反例由宿主判断，程序传播失效并阻止跳过依赖。',
+        start: {taskId: '新任务编号', scope: 'personal', goal: '本次目标', nodes: [{id: 'cause', kind: 'hypothesis', claim: '待检验机制', status: 'working', basis: '具体来源与不确定性', dependsOn: []}]},
+        challenge: {scope: 'personal', expectedRevision: 1, targets: ['cause'], evidence: {summary: '反例是什么', source: '来源定位'}},
+        revise: 'judgment-set 使用 scope、expectedRevision、reason、nodes。每个节点传完整内容；dependsOn 为 [{id,revision}]，精确版本取最近回执。'};
       if (args[0] === 'route-save') return {...result,
         scope: 'JSON 的 scope 沿用 route-context 回执。新任务使用新 taskId；已有任务的排除项会保留。',
         example: {taskId: 'example-task', scope: 'project:实际项目路径', intent: '当前要完成什么', deliverable: '本轮交付',

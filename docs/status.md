@@ -1,12 +1,12 @@
 # 开发与验证状态
 
-当前发行版本为 **0.1.16 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.16) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
+当前发行版本为 **0.1.17 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.17) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
 
 ## 本版变化
 
-「问到点上」先确定值得检验的关系，再按分歧取材，回答关键分歧后停止扩展。区分用户倾向与现场证据，不用两种解释都能容纳的事实给原因排序。已有内容足够、只要感受时直接回答；复杂推导仍保留竞争解释、反例和原业务目标检查。
+判断、证据依据与依赖现在保存为任务状态。反例触及前提后，程序使相关建议与下游决定待复核，并拒绝沿用失效版本。模型仍负责材料含义与建议变化。短问答不强制建图。
 
-固定对照三题、六场、十轮，加一场快速入口回归。生产题减少无关读取；快速入口回归从五次调用降为三次。未证明普遍提速，部分回答仍需改善，见 [方法验证](verification-ask-sharpness.md)。发行范围见 [0.1.16 验证记录](verification-0.1.16.md)。
+112 项本地测试通过。固定三轮实际模型测试中，反例改变了缩批与采购建议，独立维修保持不变；后续偏好没有恢复旧建议。详见 [0.1.17 验证记录](verification-0.1.17.md)。发行验证结果在该记录补齐。
 
 官网服务器只保留最新版安装包，历史原包保留在 GitHub。更新记录与清单中的版本历史继续保留。
 
@@ -26,6 +26,7 @@
 | --- | --- |
 | Codex | 已完成部分真实对话与固定场景验证；不保证所有表达和模型均表现一致 |
 | Claude Code | 提供安装支持；真实隐式调用与恢复仍待验收 |
+| WorkBuddy | 提供官方 `.codebuddy` 兼容路径安装；新会话加载与完整交互尚待实测，原生历史未适配 |
 | macOS arm64、Windows x64、Linux x64 | 提供独立程序；各版实际构建和安装结果见对应验证记录 |
 | 其他架构 | 可使用 Node.js 22+ 通用源码包 |
 | 多媒体输入 | 复用宿主工具；能读取哪些格式取决于所用应用 |
@@ -36,6 +37,6 @@
 
 ## 历史记录
 
-[0.1.15](verification-0.1.15.md) · [0.1.14](verification-0.1.14.md) · [0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
+[0.1.16](verification-0.1.16.md) · [0.1.15](verification-0.1.15.md) · [0.1.14](verification-0.1.14.md) · [0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
 
 各版 CI 和对话结果只对应当时的提交与条件。方法积累、反馈处理和版本更新的分工见 [迭代与更新流程](improvement-cycle.md)。

@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {dataHome} from './store.mjs';
+import {HOSTS} from './hosts.mjs';
 
 export async function projectContext(home, projectPath = process.cwd()) {
   const project = await fs.realpath(projectPath);
@@ -10,13 +11,11 @@ export async function projectContext(home, projectPath = process.cwd()) {
 }
 
 export async function doctor(home = dataHome()) {
-  const candidates = {
-    codex: {skills: path.join(os.homedir(), '.agents', 'skills'), legacySkills: path.join(os.homedir(), '.codex', 'skills'), history: path.join(os.homedir(), '.codex', 'sessions')},
-    claude: {skills: path.join(os.homedir(), '.claude', 'skills'), history: path.join(os.homedir(), '.claude', 'projects')}
-  };
+  const candidates = Object.fromEntries(Object.entries(HOSTS).map(([host, config]) => [host,
+    Object.fromEntries(Object.entries({skills: config.skills, ...config.discovery}).map(([key, value]) => [key, path.join(os.homedir(), value)]))]));
   const hosts = {};
   for (const [host, paths] of Object.entries(candidates)) {
-    hosts[host] = {};
+    hosts[host] = {loaded: 'unverified', historyAdapter: HOSTS[host].historyAdapter};
     for (const [key, value] of Object.entries(paths)) {
       let exists = false;
       try {exists = (await fs.stat(value)).isDirectory();} catch {}

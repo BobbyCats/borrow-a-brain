@@ -1,6 +1,6 @@
 # 使用指南
 
-借个脑子需要在能操作本地文件、执行命令的 Codex 或 Claude Code 中安装。其他应用需要自行核对 Skill 支持。如果你只使用网页聊天，可以粘贴 Skill 指令和材料体验提问与分析；本地记忆和历史读取需要本地应用支持。
+借个脑子需要在能操作本地文件、执行命令的 Codex、Claude Code 或 WorkBuddy 中安装。其他应用需要自行核对 Skill 支持。如果你只使用网页聊天，可以粘贴 Skill 指令和材料体验提问与分析；本地记忆和历史读取需要本地应用支持。
 
 ## 下载安装
 
@@ -15,7 +15,7 @@
 
 安装 Agent 负责选择匹配安装包和准备必要依赖。前三种安装包自带运行程序，无需安装 Node.js 或 Bun。源码包需要 Node.js 22+，不需要安装 npm 依赖；缺少兼容版本且没有匹配独立包时，由 Agent 从 Node.js 官网准备运行环境并纳入安装预览。
 
-在 Codex 或 Claude Code 中提供解压后的文件夹，输入：
+在 Codex、Claude Code 或 WorkBuddy 中提供解压后的文件夹，输入：
 
 > 帮我安装这个文件夹里的“借个脑子”。先检查环境，告诉我会装在哪里、改哪些文件，保留我原来的配置。装好后带我试一次。
 
@@ -43,7 +43,7 @@ sh "skills/bab/scripts/run.sh" setup codex "/absolute/path/to/project"
 sh "skills/bab/scripts/run.sh" setup codex "/absolute/path/to/project" --apply
 ```
 
-Claude Code 用户将 `codex` 换成 `claude`。Windows 用户将项目路径换为 Windows 绝对路径，例如 `C:\Users\YourName\Documents\my-project`。
+Claude Code 用户将 `codex` 换成 `claude`；WorkBuddy 用户换成 `workbuddy`。Windows 用户将项目路径换为 Windows 绝对路径，例如 `C:\Users\YourName\Documents\my-project`。
 
 启动器自动使用包内程序，没有独立程序时检查 Node.js 22+。Windows 使用相同参数：
 
@@ -58,8 +58,13 @@ Claude Code 用户将 `codex` 换成 `claude`。Windows 用户将项目路径换
 | --- | --- | --- |
 | Codex | `.agents/skills/` | `AGENTS.md` |
 | Claude Code | `.claude/skills/` | `CLAUDE.md` |
+| WorkBuddy | `.codebuddy/skills/` | `.codebuddy/rules/borrow-a-brain.md` |
 
 要在所有项目中使用，将项目路径替换为 `--user`。这会改为用户级安装，执行前请核对预览。非标准安装路径及其他命令见 [本地操作](../skills/bab/references/operations.md)。
+
+WorkBuddy 采用[官方项目配置兼容路径](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project)。用户级使用 `~/.codebuddy/skills/` 与 `~/.codebuddy/rules/borrow-a-brain.md`，同范围的 CodeBuddy 也可能加载。不要按名称猜测 `~/.workbuddy/AGENTS.md`。安装器只验证文件和范围；需要在新任务中确认技能发现、规则加载及一次实际调用。当前未完成 WorkBuddy 宿主实测，不将安装成功等同于完整兼容。
+
+WorkBuddy 先用自然语言调用“借个脑子”，不假设 `/bab` 一定可用。原生历史适配尚未提供；可以交付选定材料，或授权读取符合 `export` 格式的 JSON，不扫描 WorkBuddy 私有数据库。
 
 ## 第一次使用
 

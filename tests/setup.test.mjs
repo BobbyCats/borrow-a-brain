@@ -5,6 +5,8 @@ import path from 'node:path';
 import os from 'node:os';
 import {setup} from '../skills/bab/scripts/setup.mjs';
 import {uninstall} from '../skills/bab/scripts/install.mjs';
+import {HOSTS} from '../skills/bab/scripts/hosts.mjs';
+import {usageFor} from '../skills/bab/scripts/arguments.mjs';
 
 test('项目安装预览可审阅且不写入；发现冲突不等到执行', async t => {
   const temp = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'bab-setup-'))); t.after(() => fs.rm(temp, {recursive: true, force: true}));
@@ -37,4 +39,27 @@ test('Claude 规则文件、全局显式范围和移除互不混淆', async t =>
   await setup(home, {host: 'claude', project: temp, apply: true});
   await uninstall(home, claude.skillsDir);
   assert.equal(await fs.readFile(claude.rulesFile, 'utf8'), '\n\n');
+});
+
+test('宿主表覆盖项目和用户六种组合；WorkBuddy 安装不冒充加载验收', async t => {
+  const temp = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'bab-workbuddy-'))); t.after(() => fs.rm(temp, {recursive: true, force: true}));
+  for (const host of Object.keys(HOSTS)) for (const global of [false, true]) {
+    const root = path.join(temp, `${host}-${global}`); await fs.mkdir(root);
+    const data = path.join(temp, `data-${host}-${global}`);
+    const plan = await setup(data, {host, ...(global ? {global} : {project: root})}, root);
+    assert.equal(plan.skillsDir, path.join(root, HOSTS[host].skills));
+    assert.equal(plan.rulesFile, path.join(root, HOSTS[host].rules[global ? 'user' : 'project']));
+    assert.equal(plan.hostLoaded, 'unverified');
+    assert.deepEqual(await fs.readdir(root), []);
+    if (host === 'workbuddy') {
+      assert.equal(plan.historyAdapter, 'export');
+      const applied = await setup(data, {host, ...(global ? {global} : {project: root}), apply: true}, root);
+      assert.equal(applied.installed, true);
+      assert.ok((await fs.readFile(plan.rulesFile, 'utf8')).includes(path.join(plan.skillsDir, 'bab', 'SKILL.md')));
+      await setup(data, {host, ...(global ? {global} : {project: root}), apply: true}, root);
+      await uninstall(data, plan.skillsDir);
+      assert.equal(await fs.readFile(plan.rulesFile, 'utf8'), '\n\n');
+    }
+  }
+  assert.ok(usageFor('setup').includes('codex|claude|workbuddy'));
 });
