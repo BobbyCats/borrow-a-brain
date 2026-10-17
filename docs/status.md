@@ -1,14 +1,12 @@
 # 开发与验证状态
 
-当前发行版本为 **0.1.19 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.19) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
+当前发行版本为 **0.1.20 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.20) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
 
 ## 本版变化
 
-0.1.19 修复随包历史更新记录的参考链接。官网、四种安装包和本机已同步；公开下载、升级与资料保留检查通过。详见 [0.1.19 发布记录](verification-0.1.19.md)。0.1.18 原始 GitHub 附件保留。
+0.1.20 增加默认关闭的自愿使用统计。新安装、已有安装首次参加、升级和首次实际任务完成分别记录。用户同意后才发送；关闭不影响使用。回执不含聊天、方法、文件内容、个人路径或身份。详见 [0.1.20 验证记录](verification-0.1.20.md)。
 
-修订产品介绍、安装指南、三次上手练习、素材指南和公开案例，按用户任务说明操作与结果。研发验证记录保留在技术文档中。更新说明明确七天检查间隔、同版一次提醒、应用加载和网络前提。
-
-112 项本地程序测试通过。未修改的正式 0.1.16 安装包在隔离 Codex 普通写消息任务中自动调用检查，发现官网 0.1.17 并提醒；续改没有重复提醒。详见 [0.1.18 验证记录](verification-0.1.18.md)。0.1.17 的判断状态与依赖机制保持不变。
+117 项本地程序测试通过。macOS、Windows、Linux 的 Node 与原生构建共六项 CI 通过。公开安装包完整下载、原公钥签名升级及资料保留检查通过。此前功能的对话验证范围保持原记录，不据此扩大到全部宿主。
 
 官网服务器只保留最新版安装包，历史原包保留在 GitHub。更新记录与清单中的版本历史继续保留。
 
@@ -19,6 +17,7 @@
 - 素材保存与检索、获准历史读取、个人记忆，以及同范围任务恢复。
 - 安装预览、规则合并、文件改动保护、签名更新和卸载。
 - 确认发送的私有反馈、进展查询、修复版本关联与失败重试。
+- 默认关闭的安装及首次实际任务回执；重复和失败重试去重，已有安装与升级单列。
 
 程序测试检查状态、权限范围与数据一致性。方法是否适用、提问是否有用和成品是否满足任务，还依赖宿主模型。保存成功或格式完整不能代替使用效果。
 
@@ -39,11 +38,6 @@
 
 ## 历史记录
 
-[0.1.18](verification-0.1.18.md) · [0.1.17](verification-0.1.17.md) · [0.1.16](verification-0.1.16.md) · [0.1.15](verification-0.1.15.md) · [0.1.14](verification-0.1.14.md) · [0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
+[0.1.19](verification-0.1.19.md) · [0.1.18](verification-0.1.18.md) · [0.1.17](verification-0.1.17.md) · [0.1.16](verification-0.1.16.md) · [0.1.15](verification-0.1.15.md) · [0.1.14](verification-0.1.14.md) · [0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
 
 各版 CI 和对话结果只对应当时的提交与条件。方法积累、反馈处理和版本更新的分工见 [迭代与更新流程](improvement-cycle.md)。
-
-
-## 0.1.20 统计接入（验证中）
-
-实现默认关闭的自愿安装、升级与首次实际任务回执；服务端白名单与幂等去重。发布、跨平台构建、官网接收和真实浏览器验收待完成。
