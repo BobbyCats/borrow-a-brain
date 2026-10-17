@@ -1,16 +1,12 @@
 # 开发与验证状态
 
-当前发行版本为 **0.1.14 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.14) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
-
-## 未发布的本机修订
-
-「问到点上」新增按需解释重构，集中增强开放卡点的机制推导与证据分辨。固定对照八场、十六轮，另完成一场三轮定向回归，已更新本机。两道开放题有有限实质收益；第三题收益与不足并存，已按证据修订。尚未发布，效果与成本见 [本次验证](verification-explanation-rebuild.md)。
+当前待发布版本为 **0.1.15 体验版**。正式下载入口为 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases) 与[官网](https://jclab.work/tools/borrow-a-brain/#start)。
 
 ## 本版变化
 
-收录方法时，按内容建议个人通用或项目专用。可跨项目复用的做法优先建议个人通用，已有方法保持原范围。查询提示注明实际范围，区分暂无可用方法、本次不适用和查询失败。
+「问到点上」按需进入解释重构：找到旧解释遗漏的观察，拆开默认前提，主动提出不同机制，并寻找能区分解释的证据。新证据到来后更新判断，检验时回查原业务目标与转移给其他环节的代价。明确执行任务直接交付。
 
-本次发布沿用已完成的跨项目试用与不适用场景记录，不重跑模型对照。发行包和安装升级检查见 [0.1.14 验证记录](verification-0.1.14.md)。
+固定对照八场、十六轮，另完成一场三轮定向回归。两道开放题有有限实质收益；第三题收益与不足并存，已按证据修订。具体结果与成本见 [方法验证](verification-explanation-rebuild.md)。发行检查见 [0.1.15 验证记录](verification-0.1.15.md)。
 
 ## 当前支持
 
@@ -38,6 +34,6 @@
 
 ## 历史记录
 
-[0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
+[0.1.14](verification-0.1.14.md) · [0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
 
 各版 CI 和对话结果只对应当时的提交与条件。方法积累、反馈处理和版本更新的分工见 [迭代与更新流程](improvement-cycle.md)。
