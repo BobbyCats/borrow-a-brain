@@ -1,6 +1,6 @@
 interface:
   display_name: "问到点上 · Ask Me Why"
-  short_description: "一起找到让问题突然清楚的新联系；理清选择，给出有依据的建议和下一步。"
-  default_prompt: "请用 $bab-ask 和我一起想清这个问题，找有依据的新角度，再决定下一步。"
+  short_description: "拆开默认前提，主动提出能解释反常现象的新机制，用证据推进判断和行动。"
+  default_prompt: "请用 $bab-ask 和我一起推导这个卡点，挑战默认前提，找到可以检验的新解释。"
 policy:
   allow_implicit_invocation: true

@@ -2,6 +2,10 @@
 
 当前发行版本为 **0.1.14 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.14) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
 
+## 未发布的本机修订
+
+「问到点上」新增按需解释重构，集中增强开放卡点的机制推导与证据分辨。固定对照八场、十六轮，另完成一场三轮定向回归，已更新本机。两道开放题有有限实质收益；第三题收益与不足并存，已按证据修订。尚未发布，效果与成本见 [本次验证](verification-explanation-rebuild.md)。
+
 ## 本版变化
 
 收录方法时，按内容建议个人通用或项目专用。可跨项目复用的做法优先建议个人通用，已有方法保持原范围。查询提示注明实际范围，区分暂无可用方法、本次不适用和查询失败。
