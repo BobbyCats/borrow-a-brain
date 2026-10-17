@@ -135,7 +135,7 @@ profile-save 与 profile-get 返回 `readiness`，包含 readyToActivate、block
 
 ## WorkBuddy 安装与判断状态
 
-`setup workbuddy 项目路径` 预览，核对后 `--apply`。使用官方 `.codebuddy/skills` 和 `.codebuddy/rules/borrow-a-brain.md`；用户级用 `--user`，路径位于用户主目录，同范围 CodeBuddy 也可能加载。宿主表、usage 和 doctor 共用同一配置。doctor 仅报告目录，不能证明规则已注入。新任务实际调用通过后才能报告宿主验收；当前完整交互待验证。不要手改已安装的包内脚本，以免后续更新触发本地修改保护。
+`setup workbuddy 项目路径` 预览，核对后 `--apply`。使用官方文档中的代码开发配置；普通办公任务自动加载仍待验证。路径为 `.codebuddy/skills` 和 `.codebuddy/rules/borrow-a-brain.md`；用户级用 `--user`，路径位于用户主目录，同范围 CodeBuddy 也可能加载。宿主表、usage 和 doctor 共用同一配置。doctor 仅报告目录，不能证明规则已注入。新任务实际调用通过后才能报告宿主验收；当前完整交互待验证。不要手改已安装的包内脚本，以免后续更新触发本地修改保护。
 
 WorkBuddy 原生历史读取未支持。用户选定的材料可直接分析；需要批量读取已导出 JSON 时，沿用 `export` 适配器和历史授权流程。不要猜私有会话库格式或斜杠命令。
 

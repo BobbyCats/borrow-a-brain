@@ -62,7 +62,7 @@ Claude Code 用户将 `codex` 换成 `claude`；WorkBuddy 用户换成 `workbudd
 
 要在所有项目中使用，将项目路径替换为 `--user`。这会改为用户级安装，执行前请核对预览。非标准安装路径及其他命令见 [本地操作](../skills/bab/references/operations.md)。
 
-WorkBuddy 采用[官方项目配置兼容路径](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project)。用户级使用 `~/.codebuddy/skills/` 与 `~/.codebuddy/rules/borrow-a-brain.md`，同范围的 CodeBuddy 也可能加载。不要按名称猜测 `~/.workbuddy/AGENTS.md`。安装器只验证文件和范围；需要在新任务中确认技能发现、规则加载及一次实际调用。当前未完成 WorkBuddy 宿主实测，不将安装成功等同于完整兼容。
+WorkBuddy 采用官方文档所述的代码开发配置；普通办公任务的自动加载尚待验证。参见[官方项目配置兼容路径](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project)。用户级使用 `~/.codebuddy/skills/` 与 `~/.codebuddy/rules/borrow-a-brain.md`，同范围的 CodeBuddy 也可能加载。不要按名称猜测 `~/.workbuddy/AGENTS.md`。安装器只验证文件和范围；需要在新任务中确认技能发现、规则加载及一次实际调用。当前未完成 WorkBuddy 宿主实测，不将安装成功等同于完整兼容。
 
 WorkBuddy 先用自然语言调用“借个脑子”，不假设 `/bab` 一定可用。原生历史适配尚未提供；可以交付选定材料，或授权读取符合 `export` 格式的 JSON，不扫描 WorkBuddy 私有数据库。
 

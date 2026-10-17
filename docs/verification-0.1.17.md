@@ -24,7 +24,7 @@
 
 ## WorkBuddy 边界
 
-安装路径依据 [WorkBuddy 项目配置](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project) 与 [用户级配置说明](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Setting)。本版使用 `.codebuddy/skills/` 与 `.codebuddy/rules/borrow-a-brain.md`，用户级在主目录下使用相同路径。相同范围的 CodeBuddy 也可能加载这些配置。
+安装路径依据 [WorkBuddy 项目配置](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Project) 与 [用户级配置说明](https://www.codebuddy.cn/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Setting)。这些文档的明确范围是代码开发配置，不能由此推定所有普通办公任务都会加载。本版使用 `.codebuddy/skills/` 与 `.codebuddy/rules/borrow-a-brain.md`，用户级在主目录下使用相同路径。相同范围的 CodeBuddy 也可能加载这些配置。
 
 本机 WorkBuddy 5.8.3 的打包代码包含 AGENTS 规则加载相关实现，且打包的命令行帮助可运行。但桌面控制工具未能连接应用，标准 CLI 包装器另报缺少模块，因此没有完成新会话规则注入哨兵和五入口交互验收。源码迹象与目录测试不替代实际加载证明，安装回执明确返回 hostLoaded=unverified。
 

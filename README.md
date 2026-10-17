@@ -4,7 +4,7 @@
 
 借个脑子是一套中文 AI Skills。把访谈、书籍、会议记录或工作经验交给 AI，它会提炼做法，用你的问题试用，再由你决定是否保存和启用。以后遇到适合的任务，AI 会从已启用的方法中选用，不必每次点名。
 
-提供 Codex、Claude Code 和 WorkBuddy 安装入口。Codex 已完成部分对话试用；Claude Code 与 WorkBuddy 的完整宿主交互仍待验证。WorkBuddy 使用官方支持的 `.codebuddy` 兼容配置。
+提供 Codex、Claude Code 和 WorkBuddy 安装入口。Codex 已完成部分对话试用；Claude Code 与 WorkBuddy 的完整宿主交互仍待验证。WorkBuddy 使用官方文档中的代码开发兼容配置，普通办公任务的自动加载尚待验证。
 
 [安装](https://jclab.work/tools/borrow-a-brain/#start) · [使用指南](docs/quickstart.md) · [更新记录](CHANGELOG.md) · [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases)
 
