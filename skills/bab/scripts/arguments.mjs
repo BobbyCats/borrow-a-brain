@@ -4,6 +4,9 @@ const signatures = {};
 const add = (names, min, max, usage, scopes = [], flags = []) => {
   for (const name of names.split(' ')) signatures[name] = {min, max, usage, scopes, flags};
 };
+add('metrics-status metrics-flush', 0, 0, '');
+add('metrics-consent', 1, 1, '参数文件');
+add('metrics-first-use', 0, 0, '--confirmed', [], ['--confirmed']);
 add('doctor config-get material-cleanup', 0, 0, '');
 add('help', 0, 1, '[命令]');
 add('context', 0, 1, '[项目路径]');

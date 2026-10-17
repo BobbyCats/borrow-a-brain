@@ -42,3 +42,8 @@
 [0.1.18](verification-0.1.18.md) · [0.1.17](verification-0.1.17.md) · [0.1.16](verification-0.1.16.md) · [0.1.15](verification-0.1.15.md) · [0.1.14](verification-0.1.14.md) · [0.1.13](verification-0.1.13.md) · [0.1.12](verification-0.1.12.md) · [0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
 
 各版 CI 和对话结果只对应当时的提交与条件。方法积累、反馈处理和版本更新的分工见 [迭代与更新流程](improvement-cycle.md)。
+
+
+## 0.1.20 统计接入（验证中）
+
+实现默认关闭的自愿安装、升级与首次实际任务回执；服务端白名单与幂等去重。发布、跨平台构建、官网接收和真实浏览器验收待完成。

@@ -99,6 +99,11 @@ AI 会整理问题和复现步骤，你确认正文和接收地址后才发送�
 
 [常见问题](docs/quickstart.md#常见问题) · [技术说明](https://github.com/BobbyCats/borrow-a-brain/blob/main/docs/status.md) · [MIT 许可证](LICENSE) · [第三方声明](THIRD_PARTY_NOTICES.md)
 
+
+### 可选的使用统计
+
+统计默认关闭。安装时可以选择是否发送安装完成、首次任务完成和升级回执，随时说“关闭借个脑子的使用统计”即可关闭。不发送聊天、方法、文件内容或个人路径。选择不参加，功能和更新不受影响。
+
 <!-- maintainer-docs -->
 ## 开发与贡献
 

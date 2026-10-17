@@ -140,3 +140,13 @@ profile-save 与 profile-get 返回 `readiness`，包含 readyToActivate、block
 WorkBuddy 原生历史读取未支持。用户选定的材料可直接分析；需要批量读取已导出 JSON 时，沿用 `export` 适配器和历史授权流程。不要猜私有会话库格式或斜杠命令。
 
 持续推导使用 [判断状态与依赖](judgments.md)。程序保存任务版本和依赖关系，反例递归使下游待复核；模型负责证据含义与建议变化。支持读取、导出 JSON、单项删除与 data-clear。
+
+## 自愿使用统计
+
+官方安装包可发送安装完成和首次任务完成回执。默认关闭。不收集聊天、方法、文件内容、路径、用户名或联系方式。发送随机安装标识、事件编号、版本、操作系统、宿主和时间；接收服务器处理网络连接所需的 IP，但回执数据不保存 IP。
+
+安装预览中说明这项可选功能，询问是否愿意参加。用户没有明确同意就保持关闭；拒绝后不重复询问。升级保留原选择，不重新默认开启。
+
+实际安装完成后，在私有参数文件填写 `{"skillsDir":"实际安装目录","host":"codex","enabled":true,"userApproved":true}`，通过 `<运行入口> metrics-consent 参数文件` 开启。host 仅为 codex / claude / workbuddy / other。关闭传 enabled:false，不需要 userApproved。参数文件不得进 Git。
+
+`metrics-status` 查看本安装的选择；`metrics-flush` 重试未发送回执。宿主完成第一项实际任务后执行 `metrics-first-use --confirmed`。这表示宿主确认任务已完成，不代表用户满意或长期活跃。安装成功与首次使用分别去重。升级和旧安装首次参加统计单列，不冒充新安装。关闭会清除待发队列，已收到的聚合统计不会随本机删除。

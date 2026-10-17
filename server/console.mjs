@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes, timingSafeEqual, scryptSync} from 'node:crypto';
+import {receiveMetrics,metricsSummary} from './metrics.mjs';
 import {feedbackServer} from './feedback.mjs';
 import {readState, mutateState} from '../skills/bab/scripts/store.mjs';
 
@@ -9,7 +10,7 @@ export const states={received:'已收到',working:'处理中',waiting:'待补充
 export function passwordHash(password,salt=randomBytes(16).toString('hex')){return salt+':'+scryptSync(password,salt,32).toString('hex');}
 function same(a,b){return typeof a==='string'&&typeof b==='string'&&Buffer.byteLength(a)===Buffer.byteLength(b)&&timingSafeEqual(Buffer.from(a),Buffer.from(b));}
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(Buffer.byteLength(text)>40000)throw Object.assign(Error('内容过长'),{status:413});}try{return JSON.parse(text);}catch{throw Object.assign(Error('请求格式不正确'),{status:400});}}
-export function consoleServer({home,adminToken,loginHash,origin,html,versions,secure=true,trustProxy=false}){
+export function consoleServer({home,adminToken,loginHash,origin,html,versions,secure=true,trustProxy=false,analyticsHome,analyticsHTML,logSummary}){
   if(!/^[a-f0-9]{32}:[a-f0-9]{64}$/.test(loginHash))throw Error('需要有效管理员口令哈希');
   const sessions=new Map(),attempts=new Map();
   const cookieName=secure?'__Host-jclab_session':'jclab_session';
@@ -23,6 +24,19 @@ export function consoleServer({home,adminToken,loginHash,origin,html,versions,se
     const fail=(code,error)=>{reply(res,code,{error});return true;};
     const safeWrite=()=>req.headers.origin===origin&&session&&same(req.headers['x-csrf-token'],session.csrf);
     try{
+      if(req.method==='POST'&&url.pathname==='/v1/metrics'&&analyticsHome){
+        const input=await body(req);
+        if(req.headers['idempotency-key']!==input.id)return fail(400,'invalid-id');
+        const receipt=await receiveMetrics(analyticsHome,input);reply(res,200,receipt);return true;
+      }
+      if(req.method==='GET'&&url.pathname==='/admin/analytics/'&&analyticsHTML){
+        res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-robots-tag':'noindex, nofollow','content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'"});res.end(await fs.readFile(analyticsHTML));return true;
+      }
+      if(req.method==='GET'&&url.pathname==='/admin/analytics'&&analyticsHome){
+        if(!session&&!auth)return fail(401,'请先登录');
+        let logs=null;try{logs=JSON.parse(await fs.readFile(logSummary,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+        reply(res,200,{metrics:await metricsSummary(analyticsHome),logs});return true;
+      }
       if(req.method==='GET'&&url.pathname==='/health'){reply(res,200,{ok:true});return true;}
       if(req.method==='GET'&&url.pathname==='/admin/feedback/'){
         res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-robots-tag':'noindex, nofollow','content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'"});res.end(await fs.readFile(html));return true;
@@ -78,6 +92,6 @@ export function consoleServer({home,adminToken,loginHash,origin,html,versions,se
 if(process.argv[1]&&await fs.realpath(process.argv[1]).catch(()=>null)===fileURLToPath(import.meta.url)){
   const required=['BAB_INBOX_HOME','BAB_ADMIN_TOKEN','BAB_LOGIN_HASH','BAB_ORIGIN','BAB_ADMIN_HTML','BAB_RELEASES_FILE'];for(const x of required)if(!process.env[x])throw Error(`缺少 ${x}`);
   const versions=async()=>{const data=JSON.parse(await fs.readFile(process.env.BAB_RELEASES_FILE,'utf8'));return data.versions;};
-  const server=consoleServer({home:process.env.BAB_INBOX_HOME,adminToken:process.env.BAB_ADMIN_TOKEN,loginHash:process.env.BAB_LOGIN_HASH,origin:process.env.BAB_ORIGIN,html:process.env.BAB_ADMIN_HTML,versions,secure:process.env.BAB_LOCAL!=='1',trustProxy:process.env.BAB_TRUST_PROXY==='1'});
+  const server=consoleServer({home:process.env.BAB_INBOX_HOME,adminToken:process.env.BAB_ADMIN_TOKEN,loginHash:process.env.BAB_LOGIN_HASH,origin:process.env.BAB_ORIGIN,html:process.env.BAB_ADMIN_HTML,versions,secure:process.env.BAB_LOCAL!=='1',trustProxy:process.env.BAB_TRUST_PROXY==='1',analyticsHome:process.env.BAB_ANALYTICS_HOME,analyticsHTML:process.env.BAB_ANALYTICS_HTML,logSummary:process.env.BAB_LOG_SUMMARY});
   server.listen(Number(process.env.PORT||8791),'127.0.0.1',()=>console.log('JC LAB feedback service ready'));
 }

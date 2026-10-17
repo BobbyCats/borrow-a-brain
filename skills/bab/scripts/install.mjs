@@ -155,7 +155,7 @@ export async function install(home, {source, skillsDir, rulesFile, scopeRoot, ap
       await fs.mkdir(path.dirname(rulesFile), {recursive: true});
       undo.push(async () => rulesExisted ? fs.writeFile(rulesFile, before) : fs.rm(rulesFile, {force: true}));
       await fs.writeFile(rulesFile, next);
-      const receipt = {skillsDir, rulesFile, resolvedPaths, scopeRoot: checkedRoot, block, files: maps, version, installedAt: new Date().toISOString()};
+      const receipt = {...previous, skillsDir, rulesFile, resolvedPaths, scopeRoot: checkedRoot, block, files: maps, version, installedAt: new Date().toISOString(), metricsEligibleNew: previous ? previous.metricsEligibleNew === true : true};
       state.installations = state.installations.filter(i => i.skillsDir !== skillsDir); state.installations.push(receipt);
       return {...plan, resolvedPaths, scopeRoot: checkedRoot, installed: true, ruleBlockPreserved: Boolean(previous), activation: '请按宿主要求刷新 Skill 或开启新会话。'};
     });

@@ -12,6 +12,7 @@ import {createProfile, intakeProfile, listProfiles, saveProfileVersion, getProfi
 import {routingCatalog, routingContext, saveRoute, loadRoute, listRoutes, checkpointRoute} from './routing.mjs';
 import {readConfig, saveConfig} from './config.mjs';
 import {setup} from './setup.mjs';
+import {metricsStatus,metricsConsent,markFirstUse,flushMetrics} from './metrics.mjs';
 import {importMaterial, listMaterials, getMaterial, deleteMaterial, cleanupMaterials} from './materials.mjs';
 import {parseArguments, usageFor} from './arguments.mjs';
 import {startJudgment, setJudgments, challengeJudgment, loadJudgment, listJudgments, deleteJudgment} from './judgments.mjs';
@@ -21,7 +22,12 @@ export async function main(argv = process.argv.slice(2)) {
   const args = parseArguments(command, rawArgs); const home = dataHome();
   const version = JSON.parse(await fs.readFile(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'version.json'), 'utf8')).version;
   const json = async file => {if (!file) throw new Error('请提供 JSON 参数文件。'); return JSON.parse(await fs.readFile(file, 'utf8'));};
+  const ownSkillsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
   const commands = {
+    'metrics-status': () => metricsStatus(home, ownSkillsDir),
+    'metrics-consent': async () => metricsConsent(home, await json(args[0])),
+    'metrics-first-use': () => markFirstUse(home, ownSkillsDir, {confirmed:args.includes('--confirmed')}),
+    'metrics-flush': () => flushMetrics(home, ownSkillsDir),
     doctor: () => doctor(home),
     context: () => projectContext(home, args[0]),
     'config-get': () => readConfig(home),
@@ -131,5 +137,8 @@ export async function main(argv = process.argv.slice(2)) {
     }
   };
   if (!commands[command]) throw new Error(`未知命令：${command}`);
-  return commands[command]();
+  const result = await commands[command]();
+  if (['install','setup'].includes(command) && result.installed) result.metrics = await flushMetrics(home,result.skillsDir);
+  if (command === 'update-check') result.metrics = await flushMetrics(home,ownSkillsDir);
+  return result;
 }

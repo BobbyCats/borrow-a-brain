@@ -15,7 +15,7 @@ export function validateConfig(input) {
   if (!Array.isArray(sources) || sources.length > 3) throw new Error('最多配置 3 个更新源，避免检查拖延任务。');
   const resources = (input.resources || []).map(r => ({id: boundedString(r.id, '资源编号', 100), title: boundedString(r.title, '资源标题', 200), when: boundedString(r.when, '适用场景', 500), url: https(r.url)}));
   if (resources.some(r => !r.url) || new Set(resources.map(r => r.id)).size !== resources.length) throw new Error('资源需有真实地址和唯一编号。');
-  return {schema: 1, website: https(input.website ?? null), feedbackEndpoint: https(input.feedbackEndpoint ?? null), resources,
+  return {schema: 1, website: https(input.website ?? null), feedbackEndpoint: https(input.feedbackEndpoint ?? null), ...(input.metricsEndpoint ? {metricsEndpoint: https(input.metricsEndpoint)} : {}), resources,
     update: {sources: sources.map(https), publicKey: input.update?.publicKey || null}};
 }
 export async function readConfig(home) {
