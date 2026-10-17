@@ -1,12 +1,12 @@
 # 开发与验证状态
 
-当前发行版本为 **0.1.11 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.11) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
+当前发行版本为 **0.1.12 体验版**。可从 [GitHub Releases](https://github.com/BobbyCats/borrow-a-brain/releases/tag/v0.1.12) 或[官网](https://jclab.work/tools/borrow-a-brain/#start)下载。
 
 ## 本版变化
 
-「问到点上」在没有现成答案时，结合材料尝试不同解释，形成可检验的新联系。已有明确选择时继续给推荐和理由；明确执行任务直接交付。重复的收录提醒已合并，保存和启用的确认流程保持不变。
+修复独立版首次使用时误调用 Node.js 的问题。五个入口共用自动启动器，安装 Agent 负责选包、准备缺失依赖和安装后回读。用户不必提供运行命令。
 
-固定三题对照已完成。本次采用小幅体验改进，未据此承诺所有场景质量或速度提升。对照结果、采用依据与发行检查见 [0.1.11 验证记录](verification-0.1.11.md)。
+程序测试、三平台 CI、正式包新安装和 0.1.11 升级检查通过。Mac 隔离环境中的新会话验证范围与公开下载检查见 [0.1.12 验证记录](verification-0.1.12.md)。本轮不升级既有本机安装。
 
 ## 当前支持
 
@@ -34,6 +34,6 @@
 
 ## 历史记录
 
-[0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
+[0.1.11](verification-0.1.11.md) · [0.1.10](verification-0.1.10.md) · [0.1.9](verification-0.1.9.md) · [0.1.8](verification-0.1.8.md) · [0.1.7](verification-0.1.7.md) · [0.1.6](verification-0.1.6.md) · [0.1.5](verification-0.1.5.md) · [更早验证](verification.md)
 
 各版 CI 和对话结果只对应当时的提交与条件。方法积累、反馈处理和版本更新的分工见 [迭代与更新流程](improvement-cycle.md)。
